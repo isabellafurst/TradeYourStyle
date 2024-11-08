@@ -1,0 +1,30 @@
+
+{% extends "base.html" %}
+
+{% block main_content %}
+
+<form action="/search" method="get">
+    <input type="text" name="item_type" placeholder="Item Type">
+    <input type="text" name="item_color" placeholder="Color">
+    <input type="text" name="item_usage" placeholder="Usage">
+    <input type="number" name="min_price" step="0.01" placeholder="Min Price">
+    <input type="number" name="max_price" step="0.01" placeholder="Max Price">
+    <input type="text" name="item_size" placeholder="Size">
+    <button type="submit">Search</button>
+</form>
+
+<h1>Search Results</h1>
+<ul>
+    {% for listing in listings %}
+        <li>
+            <strong>{{ listing.name }}</strong><br>
+            Type: {{ listing.item_type }}<br>
+            Color: {{ listing.item_color }}<br>
+            Usage: {{ listing.item_usage }}<br>
+            Price: ${{ listing.item_price }}<br>
+            Size: {{ listing.item_size }}
+        </li>
+    {% else %}
+        <li>No listing found matching your criteria.</li>
+    {% endfor %}
+</ul>

@@ -6,7 +6,7 @@ app = Flask(__name__)
 # one or the other of these. Defaults to MySQL (PyMySQL)
 # change comment characters to switch to SQLite
 
-import cs304dbi as dbi
+import team8dbi as dbi
 # import cs304dbi_sqlite3 as dbi
 
 import secrets
@@ -42,6 +42,38 @@ def greet():
         except Exception as err:
             flash('form submission error'+str(err))
             return redirect( url_for('index') )
+        
+
+# Create a simple route for filtering
+@app.route('/search', methods=['GET'])
+def search_items():
+    item_type = request.args.get('item_type', '')
+    item_color  = request.args.get('item_color ', '')
+    item_usage = request.args.get('item_usage', '')
+    min_price = request.args.get('min_price', type=float)
+    max_price = request.args.get('max_price', type=float)
+    item_size = request.args.get('item_size', '')
+
+    # Build query
+    query = Item.query
+
+    if item_type:
+        query = query.filter(Listings.item_type.ilike(f'%{item_type}%'))
+    if item_color:
+        query = query.filter(Listings.color.ilike(f'%{item_color}%'))
+    if item_usage:
+        query = query.filter(Listings.usage.ilike(f'%{item_usage}%'))
+    if min_price is not None:
+        query = query.filter(Listings.item_price >= min_price)
+    if max_price is not None:
+        query = query.filter(Listings.item_price <= max_price)
+    if item_size:
+        query = query.filter(Listings.item_size.ilike(f'%{item_size}%'))
+
+    # Fetch the filtered items
+    items = query.all()
+
+    return render_template('search_results.html', items=items)
 
 # This route displays all the data from the submitted form onto the rendered page
 # It's unlikely you will ever need anything like this in your own applications, so
