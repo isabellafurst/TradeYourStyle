@@ -9,6 +9,10 @@ app = Flask(__name__)
 import team8dbi as dbi
 # import cs304dbi_sqlite3 as dbi
 
+#dbi.conf('team8_db')
+#conn = dbi.connect()
+#team databse
+
 import secrets
 
 app.secret_key = 'your secret here'
@@ -44,9 +48,9 @@ def greet():
             return redirect( url_for('index') )
         
 
-# Create a simple route for filtering
+#route for filtering
 @app.route('/search', methods=['GET'])
-def search_items():
+def search_listings():
     item_type = request.args.get('item_type', '')
     item_color  = request.args.get('item_color ', '')
     item_usage = request.args.get('item_usage', '')
@@ -55,7 +59,7 @@ def search_items():
     item_size = request.args.get('item_size', '')
 
     # Build query
-    query = Item.query
+    query = Listings.query
 
     if item_type:
         query = query.filter(Listings.item_type.ilike(f'%{item_type}%'))
@@ -71,9 +75,9 @@ def search_items():
         query = query.filter(Listings.item_size.ilike(f'%{item_size}%'))
 
     # Fetch the filtered items
-    items = query.all()
+    Listings = query.all()
 
-    return render_template('search_results.html', items=items)
+    return render_template('search_results.html', Listings=Listings)
 
 # This route displays all the data from the submitted form onto the rendered page
 # It's unlikely you will ever need anything like this in your own applications, so
