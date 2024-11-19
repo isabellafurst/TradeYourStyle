@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+
+<h1>Search Results</h1>
+<!-- Copied over from Daisy's code -->
+
+<ul>
+    {% for listing in listings %}
+        <li>
+            <strong>{{ listing['name'] }}</strong><br>
+            Type: {{ listing['item_type'] }}<br>
+            Color: {{ listing['item_color'] }}<br>
+            Usage: {{ listing['item_usage'] }}<br>
+            Price: ${{ listing['item_price'] }}<br>
+            Size: {{ listing['item_size'] }}<br>
+        </li>
+    {% else %}
+        <li>No listing found matching your criteria.</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

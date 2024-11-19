@@ -6,7 +6,8 @@ app = Flask(__name__)
 # one or the other of these. Defaults to MySQL (PyMySQL)
 # change comment characters to switch to SQLite
 
-import team8dbi as dbi
+import cs304dbi as dbi
+
 # import cs304dbi_sqlite3 as dbi
 
 #dbi.conf('team8_db')
@@ -29,28 +30,45 @@ def index():
 
 # You will probably not need the routes below, but they are here
 # just in case. Please delete them if you are not using them
-
-@app.route('/greet/', methods=["GET", "POST"])
-def greet():
-    if request.method == 'GET':
-        return render_template('greet.html',
-                               page_title='Form to collect username')
-    else:
-        try:
-            username = request.form['username'] # throws error if there's trouble
-            flash('form submission successful')
-            return render_template('greet.html',
-                                   page_title='Welcome '+username,
-                                   name=username)
-
-        except Exception as err:
-            flash('form submission error'+str(err))
-            return redirect( url_for('index') )
-        
-
-#route for filtering
+    
 @app.route('/search', methods=['GET'])
 def search_listings():
+    user_search = request.args.get('query', '')  
+    print(f"Search Term: {user_search}") 
+
+    if not user_search:
+        query = "select * from listing"
+        query_info = []
+    else:
+        query = """
+            select * 
+            from listing 
+            where item_color LIKE %s OR item_type LIKE %s OR item_usage LIKE %s OR item_desc LIKE %s
+        """
+        params = [f"%{user_search}%" for _ in range(4)]
+
+    try:
+        #debug statements - was having issues
+        print(f"query: {query}")
+        print(f"added parameter(s): {query_info}")
+        
+        conn = dbi.connect()
+        curs = dbi.dict_cursor(conn)
+        curs.execute(query, tuple(query_info))
+        listings = curs.fetchall()
+
+        print(f"Found these listings: {listings}")
+
+        return render_template('search.html', listings=listings)
+
+    except Exception as error:
+        flash(f"Error with the search query: {str(error)}")
+        return redirect(url_for('index'))
+
+
+#route for filtering
+#@app.route('/search', methods=['GET'])
+#def search_listings():
     item_type = request.args.get('item_type', '')
     item_color  = request.args.get('item_color ', '')
     item_usage = request.args.get('item_usage', '')
@@ -78,33 +96,6 @@ def search_listings():
     Listings = query.all()
 
     return render_template('search_results.html', Listings=Listings)
-
-# This route displays all the data from the submitted form onto the rendered page
-# It's unlikely you will ever need anything like this in your own applications, so
-# you should probably delete this handler
-
-@app.route('/formecho/', methods=['GET','POST'])
-def formecho():
-    if request.method == 'GET':
-        return render_template('form_data.html',
-                               page_title='Display of Form Data',
-                               method=request.method,
-                               form_data=request.args)
-    elif request.method == 'POST':
-        return render_template('form_data.html',
-                               page_title='Display of Form Data',
-                               method=request.method,
-                               form_data=request.form)
-    else:
-        raise Exception('this cannot happen')
-
-# This route shows how to render a page with a form on it.
-
-@app.route('/testform/')
-def testform():
-    # these forms go to the formecho route
-    return render_template('testform.html',
-                           page_title='Page with two Forms')
 
 
 if __name__ == '__main__':
