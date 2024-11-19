@@ -25,13 +25,17 @@ app.config['TRAP_BAD_REQUEST_ERRORS'] = True
 
 @app.route('/')
 def index():
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''select * from listing, user where listing.uid = user.uid order by post_date DESC;''')
+    listings = curs.fetchall()
     return render_template('main.html',
-                           page_title='Main Page')
+                           page_title='Main Page', listings = listings)
 
 # You will probably not need the routes below, but they are here
 # just in case. Please delete them if you are not using them
     
-@app.route('/search', methods=['GET'])
+@app.route('/search/', methods=['GET'])
 def search_listings():
     user_search = request.args.get('query', '')  
     print(f"Search Term: {user_search}") 
@@ -97,6 +101,36 @@ def search_listings():
 
     return render_template('search_results.html', Listings=Listings)
 
+@app.route('/add/', methods=['POST'])
+def add_listing():
+    if request.method == "POST":
+        form_data = request.form_data
+        uid = request.cookies.get('uid')
+        conn = dbi.connect()
+        curs = dbi.dict_cursor(conn)
+        item_image = form_data['image']
+        item_desc = form_data['description']
+        item_type = form_data['type']
+        item_color = form_data['color']
+        item_usage = form_data['usage']
+        item_price = form_data['price']
+        item_size = form_data['size']
+        if form_data['trade-type'] == "trade":
+            trade_type = 0
+        elif form_data['trade-type'] == "free":
+            trade_type = 1
+ 
+        curs.execute('''insert into listing(uid, item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, trade_type, item_status)
+        values(%s, %s, %s, %s, %s, %s, %s, %s, %s, 1);''', [uid, item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, trade_type])
+
+        conn.commit()
+
+        flash("Item successfully added!")
+
+        return redirect(url_for("index"))
+
+    return render_template('add_listing.html')
+
 
 if __name__ == '__main__':
     import sys, os
@@ -107,7 +141,7 @@ if __name__ == '__main__':
     else:
         port = os.getuid()
     # set this local variable to 'wmdb' or your personal or team db
-    db_to_use = 'put_database_name_here_db' 
+    db_to_use = 'team8_db' 
     print(f'will connect to {db_to_use}')
     dbi.conf(db_to_use)
     app.debug = True
