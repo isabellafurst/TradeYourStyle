@@ -1,2 +1,5 @@
 # TradeYourStyle
 CS 304 Project
+
+Our goal with our project TradeYourStyle is to offer a range of features designed to streamline the process of both trading and giving away old clothing. Since the end-of-year sustainability bins in dorm spaces are often cluttered and difficult to navigate, TradeYourStyle offers an organized and year-round opportunity for students to share, trade, and find new clothing or accessories in a sustainable and easy way. Through this platform, students can list items they don’t need and connect with other Wellesley students in the community who are interested in exchanging items or receiving them. 
+TradeYourStyle centers around a homepage with a main feed of listings, which allows users to browse, filter by attributes like item type or size, and navigate searching for items using a traditional search bar. Each user will also have their own page displaying their own listings, making it simpler for potential traders to explore similar items. Similarly, there will be a messaging feature implemented to streamline communication between users.
