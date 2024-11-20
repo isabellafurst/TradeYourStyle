@@ -10,7 +10,7 @@ import cs304dbi as dbi
 
 # import cs304dbi_sqlite3 as dbi
 
-dbi.conf('if102_db')
+dbi.conf('team8_db')
 conn = dbi.connect()
 #team databse
 
@@ -130,14 +130,14 @@ def search_listings():
 
     return render_template('search_results.html', Listings=Listings)
 
-@app.route('/add/', methods=['POST'])
+@app.route('/add/', methods=['GET','POST'])
 def add_listing():
     if request.method == "POST":
-        form_data = request.form_data
+        form_data = request.form
         uid = request.cookies.get('uid')
         conn = dbi.connect()
         curs = dbi.dict_cursor(conn)
-        item_image = form_data['image']
+       # item_image = form_data['image']
         item_desc = form_data['description']
         item_type = form_data['type']
         item_color = form_data['color']
@@ -149,9 +149,9 @@ def add_listing():
         elif form_data['trade-type'] == "free":
             trade_type = 1
  
-        curs.execute('''insert into listing(uid, item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, trade_type, item_status)
-        values(%s, %s, %s, %s, %s, %s, %s, %s, %s, 1);''', [uid, item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, trade_type])
-
+        curs.execute('''insert into listing(uid, item_desc, item_type, item_color, item_usage, item_price, item_size, trade_type, item_status)
+        values(%s, %s, %s, %s, %s, %s, %s, %s, 1);''', [2, item_desc, item_type, item_color, item_usage, item_price, item_size, trade_type])
+            # Note: image is excluded for testing purposes -- image support not yet implemented
         conn.commit()
 
         flash("Item successfully added!")

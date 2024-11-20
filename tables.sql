@@ -27,7 +27,7 @@ CREATE TABLE `listing` (
   `item_size` enum("XS","S","M","L","XL","XXL"),
   `trade_type` boolean,
   `item_status` boolean,
-  `post_date` datetime
+  `post_date` datetime DEFAULT CURRENT_TIMESTAMP
 )
 ENGINE = InnoDB;
 
