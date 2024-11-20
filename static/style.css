@@ -39,8 +39,7 @@ div.listing-card {
     padding: 20px;
     margin-right: 55%;
     margin-bottom: 10px;
-    border: 2px solid black;
-    /* border-color:#6B8E23; */
+    border: 2px solid #6B8E23;
     border-radius: 5px;
 }
 
