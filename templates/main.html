@@ -11,12 +11,14 @@
     <img src="{{listing['item_image']}}" alt = "Image">
     <div class = "listing-details">
         <h3>{{listing['display_name']}}</h3>
-        <p>{{listing['item_desc']}}</p>
-        <p>Type: {{ listing['item_type'] }}</p>
-        <p>Color: {{ listing['item_color'] }}</p>
-        <p>Usage: {{ listing['item_usage'] }}</p>
-        <p>Price: ${{ listing['item_price'] }}</p>
-        <p>Size: {{ listing['item_size'] }}</p>
+        <p class="list-attr">{{listing['item_desc']}}</p>
+        <div class = "listing-details2">
+        <p class="list-attr">Type: {{ listing['item_type'] }}</p>
+        <p class="list-attr">Color: {{ listing['item_color'] }}</p>
+        <p class="list-attr">Usage: {{ listing['item_usage'] }}</p>
+        <p class="list-attr">Price: ${{ listing['item_price'] }}</p>
+        <p class="list-attr">Size: {{ listing['item_size'] }}</p>
+    </div>
     </div>
 </div>
 

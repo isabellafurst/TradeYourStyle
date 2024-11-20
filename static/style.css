@@ -35,6 +35,20 @@ h2, h3 {
 }
     
 
+div.listing-card {
+    padding: 20px;
+    margin-right: 55%;
+    margin-bottom: 10px;
+    border: 2px solid black;
+    /* border-color:#6B8E23; */
+    border-radius: 5px;
+}
+
+div.listing-details2 p{
+    display: inline;
+    margin-right: 10px;
+}
+
 /* for a simple navbar. Talk to Scott if you want drop-downs. */
 nav > ul {
     display: flex;
