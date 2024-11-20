@@ -10,8 +10,8 @@ import cs304dbi as dbi
 
 # import cs304dbi_sqlite3 as dbi
 
-#dbi.conf('team8_db')
-#conn = dbi.connect()
+dbi.conf('if102_db')
+conn = dbi.connect()
 #team databse
 
 import secrets
@@ -36,35 +36,68 @@ def index():
 # just in case. Please delete them if you are not using them
     
 @app.route('/search/', methods=['GET'])
+# New route merges search_listings functions to include filtering
 def search_listings():
-    user_search = request.args.get('query', '')  
-    print(f"Search Term: {user_search}") 
+    item_type = request.args.getlist('item_type')  
+    item_color = request.args.getlist('item_color')
+    item_usage = request.args.getlist('item_usage')
+    item_price = request.args.getlist('item_price')
+    item_size = request.args.getlist('item_size')
+    trade_type = request.args.get('trade_type') 
+    item_status = request.args.get('item_status')
+    
+    # reaching into base.html -- search bar contents
+    user_search = request.args.get('query', '').strip()
 
-    if not user_search:
-        query = "select * from listing"
-        query_info = []
-    else:
-        query = """
-            select * 
-            from listing 
-            where item_color LIKE %s OR item_type LIKE %s OR item_usage LIKE %s OR item_desc LIKE %s
+    # build query based on filters
+    query = "select * from listing where 1=1"  # the 1=1 is just a placeholder so we can add more stuff to the query 
+    filters = []
+
+    # actually construct the query based on what the user is filtering by
+    if item_type:
+        query += " AND item_type IN %s"
+        filters.append(tuple(item_type)) # convert to tuples so SQL code doesn't screw up, adds the actual filter values to the filters list so it can become a big strong query
+    if item_color:
+        query += " AND item_color IN %s"
+        filters.append(tuple(item_color))
+    if item_usage:
+        query += " AND item_usage IN %s"
+        filters.append(tuple(item_usage))
+    if item_price:
+        query += " AND item_price IN %s"
+        filters.append(tuple(item_price))
+    if item_size:
+        query += " AND item_size IN %s"
+        filters.append(tuple(item_size))
+    if trade_type is not None:
+        query += " AND trade_type = %s"
+        filters.append(trade_type == 'on') # value is "on" since its a checkbox; if it's None the box is not checked
+    if item_status is not None:
+        query += " AND item_status = %s"
+        filters.append(item_status == 'on')
+    
+    if user_search:
+        # searches across multiple columns in table
+        query += """
+        AND (
+            item_color LIKE %s OR
+            item_desc LIKE %s OR
+            item_type LIKE %s
+        )
         """
-        params = [f"%{user_search}%" for _ in range(4)]
+        search_term = f"%{user_search}%" 
+        filters.extend([search_term, search_term, search_term])
+
+    print(f"Actual Query: {query}")
+    print(f"Filters: {filters}")
 
     try:
-        #debug statements - was having issues
-        print(f"query: {query}")
-        print(f"added parameter(s): {query_info}")
-        
         conn = dbi.connect()
         curs = dbi.dict_cursor(conn)
-        curs.execute(query, tuple(query_info))
+        curs.execute(query, tuple(filters))  # actually execute the query (u wanna work sooooo bad)
         listings = curs.fetchall()
 
-        print(f"Found these listings: {listings}")
-
         return render_template('search.html', listings=listings)
-
     except Exception as error:
         flash(f"Error with the search query: {str(error)}")
         return redirect(url_for('index'))
@@ -89,10 +122,6 @@ def search_listings():
         query = query.filter(Listings.color.ilike(f'%{item_color}%'))
     if item_usage:
         query = query.filter(Listings.usage.ilike(f'%{item_usage}%'))
-    if min_price is not None:
-        query = query.filter(Listings.item_price >= min_price)
-    if max_price is not None:
-        query = query.filter(Listings.item_price <= max_price)
     if item_size:
         query = query.filter(Listings.item_size.ilike(f'%{item_size}%'))
 

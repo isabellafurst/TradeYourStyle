@@ -2,14 +2,22 @@
 */
 
 HTML {
-    --color-header: #007ea9;  /* color for H1-H6 and others. was deepskyblue but poor contrast. */
-    --color-hilite: #b50000;  /* was red, but this avoids WAVE contrast errors */ 
-    --color-focus: #56B929;
+    --color-header: #6B8E23;  /* color for H1-H6 and others. was deepskyblue but poor contrast. */
+    --color-hilite: #8B4513;  /* was red, but this avoids WAVE contrast errors */ 
+    --color-focus: #c8e39490;
     --font-family: Verdana;
     font-family: var(--font-family)
 }
 
 /* For flashed messages; make them stand out using red and italics */
+
+body {
+    background-color: var(#e1cfb3);
+    color: var(#3E4A3F);
+    margin: 0;
+    margin-left: 20px;
+    padding: 0;
+}
 
 #messages {
     color: var(--color-hilite);
@@ -31,12 +39,13 @@ h2, h3 {
 nav > ul {
     display: flex;
     flex-direction: row;
+    justify-content: flex-start; 
+    padding: 0;
+    margin: 0;
 }
 
 nav ul {
     list-style-type: none;
-    margin: 0px;
-    padding: 0px;
 }
 
 nav > ul > li {
@@ -46,19 +55,26 @@ nav > ul > li {
 
 nav button, nav a {
     display: block;
-    box-sizing: border-box; /* easier to make button and A the same size */
+    box-sizing: border-box;
     width: 100%;
     height: 40px;
-    padding: 0px;
-    padding-bottom: 5px;
-    background-color: var(--color-header); /* was #3498db */
-    border: 2px solid black;
+    padding: 10px;
+    background-color: var(--color-header);
+    color: white;
+    border: 2px solid var(--color-border);
     border-radius: 5px;
     cursor: pointer;
-    /* Firefox uses font -apple-system unless I repeat the font spec here. */
     font-family: var(--font-family);
     font-weight: bold;
-    font-size: 1.4rem;
+    font-size: 1.2rem;
+    text-align: center;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+nav > ul > li {
+    flex: 0 0 auto;
+    width: 15em;
+    margin-right: 10px;  
 }
 
 /* Only the top-level buttons are centered; lower ones are left-aligned. */

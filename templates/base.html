@@ -4,14 +4,16 @@
     <meta charset='utf-8'>
     <!-- for mobile-friendly pages -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name=author content="">
+    <meta name=author content="Daisy, Makana, Bella">
     <title>{{ page_title }}</title>
     <link rel='stylesheet' href="{{url_for('static', filename = 'style.css')}}">
     {% block head_stuff %} {% endblock %}
 
+    <!-- the search bar -->
     <form action="/search" method="GET">
       <input type="text" name="query" placeholder="Search listings..." class="search-bar" />
-      <input type="submit" value="Search" style="display:none" />
+      <button type="submit" class="search-button">Search</button>
+
     </form>
     
     <style>
@@ -19,10 +21,8 @@
         width: 50%;            
         margin-top: 20px;      
         padding: 8px;         
-        border-radius: 4px;
-        border: 1px solid #ccc;
         font-size: 14px;       
-        margin-left: auto;     
+        margin-left: 5px;     
         margin-right: auto; 
         margin-bottom: 30px;  
       }
@@ -44,6 +44,8 @@
 <nav>
   <ul>
     <li><a href="{{url_for('index')}}">Home</a></li>
+    <li><a href="{{url_for('add_listing')}}">Create new post!</a></li>
+
   </ul>
 </nav>
 {% endblock %}

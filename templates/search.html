@@ -1,23 +1,108 @@
 {% extends "base.html" %}
 
 {% block main_content %}
+<h1>Search Filtered Listings</h1>
 
-<h1>Search Results</h1>
-<!-- Copied over from Daisy's code -->
+<form action="/search/" method="get">
+    <div>
+        <label for="item_type">Item Type:</label>
+        <select name="item_type" id="item_type" multiple>
+            <option value="shirt">Shirt</option>
+            <option value="pants">Pants</option>
+            <option value="shorts">Shorts</option>
+            <option value="skirt">Skirt</option>
+            <option value="outerwear">Outerwear</option>
+            <option value="shoes">Shoes</option>
+            <option value="accessories">Accessories</option>
+            <option value="dress">Dress</option>
+            <option value="other">Other</option>
+        </select>
+    </div>
 
+    <div>
+        <label for="item_color">Color:</label>
+        <select name="item_color" id="item_color" multiple>
+            <option value="multicolor">Multicolor</option>
+            <option value="black">Black</option>
+            <option value="white">White</option>
+            <option value="brown">Brown</option>
+            <option value="gray">Gray</option>
+            <option value="red">Red</option>
+            <option value="orange">Orange</option>
+            <option value="yellow">Yellow</option>
+            <option value="green">Green</option>
+            <option value="blue">Blue</option>
+            <option value="purple">Purple</option>
+            <option value="pink">Pink</option>
+            <option value="gold">Gold</option>
+            <option value="silver">Silver</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="item_usage">Usage:</label>
+        <select name="item_usage" id="item_usage" multiple>
+            <option value="new">New</option>
+            <option value="like-new">Like New</option>
+            <option value="well-loved">Well Loved</option>
+            <option value="needs work">Needs Work</option>
+            <option value="trash it">Trash It</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="item_price">Price:</label>
+        <select name="item_price" id="item_price" multiple>
+            <option value="$">$</option>
+            <option value="$$">$$</option>
+            <option value="$$$">$$$</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="item_size">Size:</label>
+        <select name="item_size" id="item_size" multiple>
+            <option value="XS">XS</option>
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+            <option value="XL">XL</option>
+            <option value="XXL">XXL</option>
+        </select>
+    </div>
+
+    <div class="checkbox-group">
+        <label for="trade_type">
+            <input type="checkbox" name="trade_type" id="trade_type"> Trade Only
+        </label>
+    </div>
+
+    <div class="checkbox-group">
+        <label for="item_status">
+            <input type="checkbox" name="item_status" id="item_status"> Available
+        </label>
+    </div>
+
+    <button type="submit">Search</button>
+</form>
+
+<h2>Search Results</h2>
 <ul>
     {% for listing in listings %}
         <li>
-            <strong>{{ listing['name'] }}</strong><br>
-            Type: {{ listing['item_type'] }}<br>
-            Color: {{ listing['item_color'] }}<br>
-            Usage: {{ listing['item_usage'] }}<br>
-            Price: ${{ listing['item_price'] }}<br>
-            Size: {{ listing['item_size'] }}<br>
+            <strong>{{ listing.name }}</strong><br>
+            Type: {{ listing.item_type }}<br>
+            Color: {{ listing.item_color }}<br>
+            Usage: {{ listing.item_usage }}<br>
+            Price: {{ listing.item_price }}<br>
+            Size: {{ listing.item_size }}<br>
+            Type: {{ "Yes" if listing.trade_type else "No" }}<br>
+            Status: {{ "Available" if listing.item_status else "Unavailable" }}
         </li>
     {% else %}
-        <li>No listing found matching your criteria.</li>
+        <li>No listings found matching your criteria.</li>
     {% endfor %}
 </ul>
-
 {% endblock %}
+
+
