@@ -27,14 +27,12 @@ app.config['TRAP_BAD_REQUEST_ERRORS'] = True
 def index():
     conn = dbi.connect()
     curs = dbi.dict_cursor(conn)
-    curs.execute('''select * from listing, user where listing.uid = user.uid order by post_date DESC;''')
+    curs.execute('''select 'uid', item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
+                  from listing, user where listing.uid = user.uid order by post_date DESC;''')
     listings = curs.fetchall()
     return render_template('main.html',
                            page_title='Main Page', listings = listings)
 
-# You will probably not need the routes below, but they are here
-# just in case. Please delete them if you are not using them
-    
 @app.route('/search/', methods=['GET'])
 # New route merges search_listings functions to include filtering
 def search_listings():
@@ -102,39 +100,11 @@ def search_listings():
         flash(f"Error with the search query: {str(error)}")
         return redirect(url_for('index'))
 
-
-#route for filtering
-#@app.route('/search', methods=['GET'])
-#def search_listings():
-    item_type = request.args.get('item_type', '')
-    item_color  = request.args.get('item_color ', '')
-    item_usage = request.args.get('item_usage', '')
-    min_price = request.args.get('min_price', type=float)
-    max_price = request.args.get('max_price', type=float)
-    item_size = request.args.get('item_size', '')
-
-    # Build query
-    query = Listings.query
-
-    if item_type:
-        query = query.filter(Listings.item_type.ilike(f'%{item_type}%'))
-    if item_color:
-        query = query.filter(Listings.color.ilike(f'%{item_color}%'))
-    if item_usage:
-        query = query.filter(Listings.usage.ilike(f'%{item_usage}%'))
-    if item_size:
-        query = query.filter(Listings.item_size.ilike(f'%{item_size}%'))
-
-    # Fetch the filtered items
-    Listings = query.all()
-
-    return render_template('search_results.html', Listings=Listings)
-
 @app.route('/add/', methods=['GET','POST'])
 def add_listing():
     if request.method == "POST":
         form_data = request.form
-        uid = request.cookies.get('uid')
+        uid = request.cookies.get('uid') # use sessions here instead
         conn = dbi.connect()
         curs = dbi.dict_cursor(conn)
        # item_image = form_data['image']
