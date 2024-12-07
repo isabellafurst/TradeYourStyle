@@ -10,7 +10,7 @@ import cs304dbi as dbi
 
 # import cs304dbi_sqlite3 as dbi
 
-dbi.conf('if102_db')
+dbi.conf('team8_db')
 #team databse
 
 import secrets
