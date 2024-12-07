@@ -109,35 +109,6 @@ def search_listings():
         flash(f"Error with the search query: {str(error)}")
         return redirect(url_for('index'))
 
-
-#route for filtering
-#@app.route('/search', methods=['GET'])
-#def search_listings():
-    item_type = request.args.get('item_type', '')
-    item_color  = request.args.get('item_color ', '')
-    item_usage = request.args.get('item_usage', '')
-    min_price = request.args.get('min_price', type=float)
-    max_price = request.args.get('max_price', type=float)
-    item_size = request.args.get('item_size', '')
-
-    # Build query
-    query = Listings.query
-
-    if item_type:
-        query = query.filter(Listings.item_type.ilike(f'%{item_type}%'))
-    if item_color:
-        query = query.filter(Listings.color.ilike(f'%{item_color}%'))
-    if item_usage:
-        query = query.filter(Listings.usage.ilike(f'%{item_usage}%'))
-    if item_size:
-        query = query.filter(Listings.item_size.ilike(f'%{item_size}%'))
-
-    # Fetch the filtered items
-    Listings = query.all()
-
-    return render_template('search_results.html', Listings=Listings)
-
-
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -151,7 +122,6 @@ def image(id):
         [id])
     pic = curs.fetchone()
     return send_from_directory(app.config['UPLOAD_FOLDER'], pic['item_image'])
-
 
 
 @app.route('/add/', methods=['GET','POST'])
