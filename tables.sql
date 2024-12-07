@@ -35,8 +35,9 @@ CREATE TABLE `message` (
   `mid` int PRIMARY KEY AUTO_INCREMENT,
   `lis_id` int not null,
   `lister_uid` int not null,
-  `comment_uid` int not null,
-  `time_stamp` datetime
+  `sender_uid` int not null,  -- The user sending the message
+  `time_stamp` datetime,
+  `message_text` varchar(100) NOT NULL
 )
 ENGINE = InnoDB;
 
@@ -56,4 +57,4 @@ ALTER TABLE `message` ADD FOREIGN KEY (`lis_id`) REFERENCES `listing` (`lis_id`)
 
 ALTER TABLE `message` ADD FOREIGN KEY (`lister_uid`) REFERENCES `user` (`uid`) on update cascade on delete cascade;
 
-ALTER TABLE `message` ADD FOREIGN KEY (`comment_uid`) REFERENCES `user` (`uid`) on update cascade on delete cascade;
+ALTER TABLE `message` ADD FOREIGN KEY (`sender_uid`) REFERENCES `user` (`uid`) on update cascade on delete cascade;

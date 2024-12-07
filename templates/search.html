@@ -3,7 +3,7 @@
 {% block main_content %}
 <h1>Search Filtered Listings</h1>
 
-<form action="/search/" method="get">
+<form action="{{url_for('search_listings')}}" method="get">
     <div>
         <label for="item_type">Item Type:</label>
         <select name="item_type" id="item_type" multiple>
@@ -18,26 +18,11 @@
             <option value="other">Other</option>
         </select>
     </div>
-
-    <div>
-        <label for="item_color">Color:</label>
-        <select name="item_color" id="item_color" multiple>
-            <option value="multicolor">Multicolor</option>
-            <option value="black">Black</option>
-            <option value="white">White</option>
-            <option value="brown">Brown</option>
-            <option value="gray">Gray</option>
-            <option value="red">Red</option>
-            <option value="orange">Orange</option>
-            <option value="yellow">Yellow</option>
-            <option value="green">Green</option>
-            <option value="blue">Blue</option>
-            <option value="purple">Purple</option>
-            <option value="pink">Pink</option>
-            <option value="gold">Gold</option>
-            <option value="silver">Silver</option>
-        </select>
-    </div>
+<!-- Need template inherritance here -- get it from add_listing -->
+<div>
+    <label for="item_color">Color:</label>
+    {% include "_item_color_dropdown.html" with name="item_color" id="item_color" multiple=True %}
+</div>
 
     <div>
         <label for="item_usage">Usage:</label>
@@ -45,8 +30,8 @@
             <option value="new">New</option>
             <option value="like-new">Like New</option>
             <option value="well-loved">Well Loved</option>
-            <option value="needs work">Needs Work</option>
-            <option value="trash it">Trash It</option>
+            <option value="needs-work">Needs Work</option>
+            <option value="trash-it">Trash It</option>
         </select>
     </div>
 

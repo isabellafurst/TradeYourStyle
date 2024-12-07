@@ -1,7 +1,14 @@
 from flask import (Flask, render_template, make_response, url_for, request,
                    redirect, flash, session, send_from_directory, jsonify)
 from werkzeug.utils import secure_filename
+
+UPLOAD_FOLDER = '/path/to/the/uploads' # change this to something - i'm not sure what yet
+ALLOWED_EXTENSIONS = { 'png', 'jpg', 'jpeg'}
+
+
+
 app = Flask(__name__)
+
 
 # one or the other of these. Defaults to MySQL (PyMySQL)
 # change comment characters to switch to SQLite
@@ -9,6 +16,7 @@ app = Flask(__name__)
 import os
 
 import cs304dbi as dbi
+import sys, os, random
 import pymysql
 import bcrypt
 import tradeyourstyle_login as auth
@@ -17,7 +25,6 @@ import tradeyourstyle_login as auth
 # import cs304dbi_sqlite3 as dbi
 
 dbi.conf('team8_db')
-conn = dbi.connect()
 #team databse
 
 import secrets
@@ -28,7 +35,10 @@ app.secret_key = secrets.token_hex()
 
 # This gets us better error messages for certain common request errors
 app.config['TRAP_BAD_REQUEST_ERRORS'] = True
+app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['MAX_CONTENT_LENGTH'] = 1*1024*1024 # 1 MB
 
+#Home page with user login/join 
 @app.route('/')
 def index():
     conn = dbi.connect()
@@ -40,7 +50,16 @@ def index():
 def main():
     conn = dbi.connect()
     curs = dbi.dict_cursor(conn)
-    curs.execute('''select * from listing, user where listing.uid = user.uid order by post_date DESC;''')
+    return render_template('greet.html',
+                           page_title='Login Page')
+
+#Listing page
+@app.route('/main/')
+def main():
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''select 'uid', item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
+                  from listing, user where listing.uid = user.uid order by post_date DESC;''')
     listings = curs.fetchall()
     return render_template('main.html',
                            page_title='Main Page', listings = listings)
@@ -186,42 +205,30 @@ def search_listings():
         flash(f"Error with the search query: {str(error)}")
         return redirect(url_for('index'))
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-#route for filtering
-#@app.route('/search', methods=['GET'])
-#def search_listings():
-    item_type = request.args.get('item_type', '')
-    item_color  = request.args.get('item_color ', '')
-    item_usage = request.args.get('item_usage', '')
-    min_price = request.args.get('min_price', type=float)
-    max_price = request.args.get('max_price', type=float)
-    item_size = request.args.get('item_size', '')
+@app.route('/image/<id>')
+def image(id):
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    curs.execute(
+        '''select item_image from listing where lis_id = %s;''',
+        [id])
+    pic = curs.fetchone()
+    return send_from_directory(app.config['UPLOAD_FOLDER'], pic['item_image'])
 
-    # Build query
-    query = Listings.query
-
-    if item_type:
-        query = query.filter(Listings.item_type.ilike(f'%{item_type}%'))
-    if item_color:
-        query = query.filter(Listings.color.ilike(f'%{item_color}%'))
-    if item_usage:
-        query = query.filter(Listings.usage.ilike(f'%{item_usage}%'))
-    if item_size:
-        query = query.filter(Listings.item_size.ilike(f'%{item_size}%'))
-
-    # Fetch the filtered items
-    Listings = query.all()
-
-    return render_template('search_results.html', Listings=Listings)
 
 @app.route('/add/', methods=['GET','POST'])
 def add_listing():
     if request.method == "POST":
         form_data = request.form
-        uid = request.cookies.get('uid')
+
+        uid = request.cookies.get('uid') # use sessions here instead
         conn = dbi.connect()
         curs = dbi.dict_cursor(conn)
-       # item_image = form_data['image']
+
         item_desc = form_data['description']
         item_type = form_data['type']
         item_color = form_data['color']
@@ -235,7 +242,27 @@ def add_listing():
  
         curs.execute('''insert into listing(uid, item_desc, item_type, item_color, item_usage, item_price, item_size, trade_type, item_status)
         values(%s, %s, %s, %s, %s, %s, %s, %s, 1);''', [2, item_desc, item_type, item_color, item_usage, item_price, item_size, trade_type])
-            # Note: image is excluded for testing purposes -- image support not yet implemented
+            # replace 2 with uid later!
+        conn.commit()
+
+        curs.execute('''select last_insert_id() as last_id;''')
+        lis_id = curs.fetchone()['last_id']
+
+         # photo upload code
+        if 'image' not in request.files:
+            flash('No file part')
+            return render_template("add_listing.html")
+        file = request.files['image']
+        user_filename = file.filename
+        if user_filename == '':
+            flash('No selected file')
+            return render_template("add_listing.html")
+        if file and allowed_file(user_filename):
+            ext = user_filename.split('.')[-1]
+            filename = secure_filename('{}_{}.{}'.format("2", lis_id, ext)) # replace 2 with uid later!
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        curs.execute('''update listing set item_image = %s where lis_id = %s''', [filename, lis_id])
         conn.commit()
 
         flash("Item successfully added!")
@@ -243,6 +270,75 @@ def add_listing():
         return redirect(url_for("index"))
 
     return render_template('add_listing.html')
+
+# @app.route('/listing/<int:lis_id>') Might need this for messaging purposes, but right now it's pissing me AWF <3
+# def view_listing(lis_id):
+#     conn = dbi.connect()
+#     curs = dbi.dict_cursor(conn)
+#     curs.execute('''select item_desc, item_type, item_color, item_usage, item_price, item_size, trade_type, item_status
+#                     from listing where lis_id = %s;''', [lis_id])
+#     listing = curs.fetchone()
+
+#     if listing is None:
+#         flash("Listing not found.")
+#         return redirect(url_for('index'))
+
+#     return render_template('view_listing.html', listing=listing)
+
+# Route to view a user's own messages
+@app.route('/messages/')
+def view_messages():
+    # Once login is set up, we can use sessions:
+    # if 'uid' not in session: 
+    #     flash("Login to view your messages!")
+    #     return redirect(url_for('index'))
+    # uid = session['uid']
+    uid = 1  # temporary for testing
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''select m.mid, m.time_stamp, u.display_name as sender, 
+                    m.message_text, l.item_desc, m.lis_id 
+                    from message m
+                    join user u on m.sender_uid = u.uid 
+                    join listing l on m.lis_id = l.lis_id 
+                    where m.lis_id = %s  
+                    order by m.time_stamp ASC;
+                    ''', [uid])
+    messages = curs.fetchall()
+    print(messages)  # Check if all messages are fetched
+    
+    return render_template('messages.html', page_title='Your Messages', messages=messages)
+
+# Route to send a message to another user based on a listing -- also not rly working yet lolz
+@app.route('/send_message/<int:lis_id>', methods=['GET', 'POST'])
+def send_message(lis_id):
+    # if 'uid' not in session:
+    #     flash("Login to send messages!")
+    #     return redirect(url_for('index'))
+    # sender_uid = session['uid']
+    sender_uid = 1 #temporary for testing
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+
+    # get the lister_uid for the desired listing
+    curs.execute('''select uid from listing where lis_id = %s;''', [lis_id])
+    lister_uid_row = curs.fetchone()
+    if not lister_uid_row:
+        flash("No listing found.")
+        return redirect(url_for('index'))
+    lister_uid = lister_uid_row['uid']
+
+    if request.method == 'POST':
+        # insert the new message into the database
+        message_text = request.form['message']
+        curs.execute('''insert into message (lis_id, lister_uid, sender_uid, time_stamp) 
+                        values (%s, %s, %s, now());''', [lis_id, lister_uid, sender_uid])
+        conn.commit()
+        flash("Message sent!")
+        return redirect(url_for('view_messages'))
+
+    # Render message form
+    return render_template('send_message.html', page_title='Send Message', lis_id=lis_id)
 
 
 if __name__ == '__main__':
