@@ -159,8 +159,7 @@ def add_listing():
     if request.method == "POST":
         form_data = request.form
 
-        uid = request.cookies.get('uid')
-
+        uid = request.cookies.get('uid') # use sessions here instead
         conn = dbi.connect()
         curs = dbi.dict_cursor(conn)
 
