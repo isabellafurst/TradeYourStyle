@@ -2,7 +2,6 @@ from flask import (Flask, render_template, make_response, url_for, request,
                    redirect, flash, session, send_from_directory, jsonify)
 from werkzeug.utils import secure_filename
 
-UPLOAD_FOLDER = '/path/to/the/uploads' # change this to something - i'm not sure what yet
 ALLOWED_EXTENSIONS = { 'png', 'jpg', 'jpeg'}
 
 
@@ -51,7 +50,7 @@ def index():
 def main():
     conn = dbi.connect()
     curs = dbi.dict_cursor(conn)
-    curs.execute('''select 'uid', item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
+    curs.execute('''select lis_id, 'uid', item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
                   from listing, user where listing.uid = user.uid order by post_date DESC;''')
     listings = curs.fetchall()
     return render_template('main.html',
