@@ -72,22 +72,29 @@
 </form>
 
 <h2>Search Results</h2>
-<ul>
-    {% for listing in listings %}
-        <li>
-            <strong>{{ listing.name }}</strong><br>
-            Type: {{ listing.item_type }}<br>
-            Color: {{ listing.item_color }}<br>
-            Usage: {{ listing.item_usage }}<br>
-            Price: {{ listing.item_price }}<br>
-            Size: {{ listing.item_size }}<br>
-            Type: {{ "Yes" if listing.trade_type else "No" }}<br>
-            Status: {{ "Available" if listing.item_status else "Unavailable" }}
-        </li>
-    {% else %}
-        <li>No listings found matching your criteria.</li>
-    {% endfor %}
-</ul>
+
+{% for listing in listings %}
+
+<div class = "listing-card">
+    <img src="{{listing['item_image']}}" alt = "Image">
+    <div class = "listing-details">
+        <h3>{{listing['display_name']}}</h3>
+        <p class="list-attr">{{listing['item_desc']}}</p>
+        <div class = "listing-details2">
+        <p class="list-attr">Type: {{ listing['item_type'] }}</p>
+        <p class="list-attr">Color: {{ listing['item_color'] }}</p>
+        <p class="list-attr">Usage: {{ listing['item_usage'] }}</p>
+        <p class="list-attr">Price: {{ listing['item_price'] }}</p>
+        <p class="list-attr">Size: {{ listing['item_size'] }}</p>
+    </div>
+    </div>
+</div>
+
+{% else %}
+        <p>No listings found matching your criteria.</p>
+
+{% endfor %}
+
 {% endblock %}
 
 
