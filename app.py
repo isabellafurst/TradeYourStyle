@@ -13,8 +13,14 @@ app = Flask(__name__)
 # one or the other of these. Defaults to MySQL (PyMySQL)
 # change comment characters to switch to SQLite
 
+import os
+
 import cs304dbi as dbi
 import sys, os, random
+import pymysql
+import bcrypt
+import tradeyourstyle_login as auth
+
 
 # import cs304dbi_sqlite3 as dbi
 
@@ -32,8 +38,24 @@ app.config['TRAP_BAD_REQUEST_ERRORS'] = True
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 1*1024*1024 # 1 MB
 
+#Home page with user login/join 
 @app.route('/')
 def index():
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    return render_template('greet.html',
+                           page_title='Login Page')
+
+@app.route('/main/')
+def main():
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    return render_template('greet.html',
+                           page_title='Login Page')
+
+#Listing page
+@app.route('/main/')
+def main():
     conn = dbi.connect()
     curs = dbi.dict_cursor(conn)
     curs.execute('''select 'uid', item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
@@ -42,6 +64,80 @@ def index():
     return render_template('main.html',
                            page_title='Main Page', listings = listings)
 
+@app.route('/join/', methods=["POST"])
+def join():
+    username = request.form.get('username')
+    passwd1 = request.form.get('password1')
+    passwd2 = request.form.get('password2')
+    if passwd1 != passwd2:
+        flash('passwords do not match')
+        return redirect( url_for('index'))
+    conn = dbi.connect()
+    (uid, is_dup, other_err) = auth.insert_user(conn, username, passwd1)
+    if other_err:
+        raise other_err
+    if is_dup:
+        flash('Sorry; that username is taken')
+        return redirect(url_for('index'))
+    ## success
+    flash('FYI, you were issued UID {}'.format(uid))
+    session['username'] = username
+    session['uid'] = uid
+    session['logged_in'] = True
+    session['visits'] = 1
+    return redirect( url_for('user', username=username) )
+
+@app.route('/login/', methods=["POST"])
+def login():
+    username = request.form.get('username')
+    passwd = request.form.get('password')
+    conn = dbi.connect()
+    (ok, uid) = auth.login_user(conn, username, passwd)
+    if not ok:
+        flash('login incorrect, please try again or join')
+        return redirect(url_for('index'))
+    ## success
+    print('LOGIN', username)
+    flash('successfully logged in as '+username)
+    session['username'] = username
+    session['uid'] = uid
+    session['logged_in'] = True
+    session['visits'] = 1
+    return redirect( url_for('user', username=username) )
+
+@app.route('/user/<username>')
+def user(username):
+    try:
+        # don't trust the URL; it's only there for decoration
+        if 'username' in session:
+            username = session['username']
+            uid = session['uid']
+            session['visits'] = 1+int(session['visits'])
+            return render_template('greet.html',
+                                   page_title='My App: Welcome {}'.format(username),
+                                   name=username,
+                                   uid=uid,
+                                   visits=session['visits'])
+        else:
+            flash('you are not logged in. Please login or join')
+            return redirect( url_for('index') )
+    except Exception as err:
+        flash('some kind of error '+str(err))
+        return redirect( url_for('index') )
+
+@app.route('/logout/')
+def logout():
+    if 'username' in session:
+        username = session['username']
+        session.pop('username')
+        session.pop('uid')
+        session.pop('logged_in')
+        flash('You are logged out')
+        return redirect(url_for('index'))
+    else:
+        flash('you are not logged in. Please login or join')
+        return redirect( url_for('index') )
+    
 @app.route('/search/', methods=['GET'])
 # New route merges search_listings functions to include filtering
 def search_listings():
