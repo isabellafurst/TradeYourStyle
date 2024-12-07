@@ -1,12 +1,20 @@
 from flask import (Flask, render_template, make_response, url_for, request,
                    redirect, flash, session, send_from_directory, jsonify)
 from werkzeug.utils import secure_filename
+
+UPLOAD_FOLDER = '/path/to/the/uploads' # change this to something - i'm not sure what yet
+ALLOWED_EXTENSIONS = { 'png', 'jpg', 'jpeg'}
+
+
+
 app = Flask(__name__)
+
 
 # one or the other of these. Defaults to MySQL (PyMySQL)
 # change comment characters to switch to SQLite
 
 import cs304dbi as dbi
+import sys, os, random
 
 # import cs304dbi_sqlite3 as dbi
 
@@ -22,6 +30,8 @@ app.secret_key = secrets.token_hex()
 
 # This gets us better error messages for certain common request errors
 app.config['TRAP_BAD_REQUEST_ERRORS'] = True
+app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['MAX_CONTENT_LENGTH'] = 1*1024*1024 # 1 MB
 
 @app.route('/')
 def index():
@@ -130,14 +140,33 @@ def search_listings():
 
     return render_template('search_results.html', Listings=Listings)
 
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/image/<id>')
+def image(id):
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    curs.execute(
+        '''select item_image from listing where lis_id = %s;''',
+        [id])
+    pic = curs.fetchone()
+    return send_from_directory(app.config['UPLOAD_FOLDER'], pic['item_image'])
+
+
+
 @app.route('/add/', methods=['GET','POST'])
 def add_listing():
     if request.method == "POST":
         form_data = request.form
+
         uid = request.cookies.get('uid')
+
         conn = dbi.connect()
         curs = dbi.dict_cursor(conn)
-       # item_image = form_data['image']
+
         item_desc = form_data['description']
         item_type = form_data['type']
         item_color = form_data['color']
@@ -151,7 +180,27 @@ def add_listing():
  
         curs.execute('''insert into listing(uid, item_desc, item_type, item_color, item_usage, item_price, item_size, trade_type, item_status)
         values(%s, %s, %s, %s, %s, %s, %s, %s, 1);''', [2, item_desc, item_type, item_color, item_usage, item_price, item_size, trade_type])
-            # Note: image is excluded for testing purposes -- image support not yet implemented
+            # replace 2 with uid later!
+        conn.commit()
+
+        curs.execute('''select last_insert_id() as last_id;''')
+        lis_id = curs.fetchone()['last_id']
+
+         # photo upload code
+        if 'image' not in request.files:
+            flash('No file part')
+            return render_template("add_listing.html")
+        file = request.files['image']
+        user_filename = file.filename
+        if user_filename == '':
+            flash('No selected file')
+            return render_template("add_listing.html")
+        if file and allowed_file(user_filename):
+            ext = user_filename.split('.')[-1]
+            filename = secure_filename('{}_{}.{}'.format("2", lis_id, ext)) # replace 2 with uid later!
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        curs.execute('''update listing set item_image = %s where lis_id = %s''', [filename, lis_id])
         conn.commit()
 
         flash("Item successfully added!")
