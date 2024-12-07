@@ -46,13 +46,6 @@ def index():
     return render_template('greet.html',
                            page_title='Login Page')
 
-@app.route('/main/')
-def main():
-    conn = dbi.connect()
-    curs = dbi.dict_cursor(conn)
-    return render_template('greet.html',
-                           page_title='Login Page')
-
 #Listing page
 @app.route('/main/')
 def main():
