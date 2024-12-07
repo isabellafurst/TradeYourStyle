@@ -158,13 +158,9 @@ def image(id):
 def add_listing():
     if request.method == "POST":
         form_data = request.form
-<<<<<<< HEAD
 
         uid = request.cookies.get('uid')
 
-=======
-        uid = request.cookies.get('uid') # use sessions here instead
->>>>>>> 6d459d38d5948165ae305e30baa16431db5669fc
         conn = dbi.connect()
         curs = dbi.dict_cursor(conn)
 
@@ -287,7 +283,7 @@ if __name__ == '__main__':
         port = int(sys.argv[1])
         assert(port>1024)
     else:
-        port = 5000
+        port = os.getuid()
     # set this local variable to 'wmdb' or your personal or team db
     db_to_use = 'team8_db' 
     print(f'will connect to {db_to_use}')
