@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+<h1>Listing Details</h1>
+<table>
+    <tr>
+        <th>Description</th>
+        <td>{{ listing.item_desc }}</td>
+    </tr>
+    <tr>
+        <th>Type</th>
+        <td>{{ listing.item_type }}</td>
+    </tr>
+    <tr>
+        <th>Color</th>
+        <td>{{ listing.item_color }}</td>
+    </tr>
+    <tr>
+        <th>Usage</th>
+        <td>{{ listing.item_usage }}</td>
+    </tr>
+    <tr>
+        <th>Price</th>
+        <td>{{ listing.item_price }}</td>
+    </tr>
+    <tr>
+        <th>Size</th>
+        <td>{{ listing.item_size }}</td>
+    </tr>
+</table>
+
+<a href="{{ url_for('index') }}">Back to Main Page</a>
+
+{% endblock %}

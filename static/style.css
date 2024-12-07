@@ -101,3 +101,52 @@ nav button:hover, button:focus, nav a:hover, nav a:focus {
     background-color: var(--color-focus);
 }
 
+
+/* Base style for the message container */
+.message-container {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Style for individual messages */
+.message {
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    position: relative;
+    max-width: 60%;
+    word-wrap: break-word;
+}
+
+/* Sent messages */
+.message.sent {
+    background-color: #e0f7fa;
+    align-self: flex-end;
+}
+
+/* Received messages */
+.message.received {
+    background-color: #f1f1f1;
+    align-self: flex-start;
+}
+
+/* Time and sender's info */
+.message-time {
+    font-size: 0.8em;
+    color: #888;
+    margin-bottom: 5px;
+}
+
+.message-text {
+    font-size: 1.1em;
+    margin-bottom: 5px;
+}
+
+.message-from {
+    font-size: 0.9em;
+    color: #555;
+}
+
