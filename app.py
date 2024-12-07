@@ -19,7 +19,6 @@ import sys, os, random
 # import cs304dbi_sqlite3 as dbi
 
 dbi.conf('team8_db')
-conn = dbi.connect()
 #team databse
 
 import secrets
@@ -37,14 +36,12 @@ app.config['MAX_CONTENT_LENGTH'] = 1*1024*1024 # 1 MB
 def index():
     conn = dbi.connect()
     curs = dbi.dict_cursor(conn)
-    curs.execute('''select * from listing, user where listing.uid = user.uid order by post_date DESC;''')
+    curs.execute('''select 'uid', item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
+                  from listing, user where listing.uid = user.uid order by post_date DESC;''')
     listings = curs.fetchall()
     return render_template('main.html',
                            page_title='Main Page', listings = listings)
 
-# You will probably not need the routes below, but they are here
-# just in case. Please delete them if you are not using them
-    
 @app.route('/search/', methods=['GET'])
 # New route merges search_listings functions to include filtering
 def search_listings():
@@ -161,9 +158,13 @@ def image(id):
 def add_listing():
     if request.method == "POST":
         form_data = request.form
+<<<<<<< HEAD
 
         uid = request.cookies.get('uid')
 
+=======
+        uid = request.cookies.get('uid') # use sessions here instead
+>>>>>>> 6d459d38d5948165ae305e30baa16431db5669fc
         conn = dbi.connect()
         curs = dbi.dict_cursor(conn)
 
@@ -209,6 +210,75 @@ def add_listing():
 
     return render_template('add_listing.html')
 
+# @app.route('/listing/<int:lis_id>') Might need this for messaging purposes, but right now it's pissing me AWF <3
+# def view_listing(lis_id):
+#     conn = dbi.connect()
+#     curs = dbi.dict_cursor(conn)
+#     curs.execute('''select item_desc, item_type, item_color, item_usage, item_price, item_size, trade_type, item_status
+#                     from listing where lis_id = %s;''', [lis_id])
+#     listing = curs.fetchone()
+
+#     if listing is None:
+#         flash("Listing not found.")
+#         return redirect(url_for('index'))
+
+#     return render_template('view_listing.html', listing=listing)
+
+# Route to view a user's own messages
+@app.route('/messages/')
+def view_messages():
+    # Once login is set up, we can use sessions:
+    # if 'uid' not in session: 
+    #     flash("Login to view your messages!")
+    #     return redirect(url_for('index'))
+    # uid = session['uid']
+    uid = 1  # temporary for testing
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''select m.mid, m.time_stamp, u.display_name as sender, 
+                    m.message_text, l.item_desc, m.lis_id 
+                    from message m
+                    join user u on m.sender_uid = u.uid 
+                    join listing l on m.lis_id = l.lis_id 
+                    where m.lis_id = %s  
+                    order by m.time_stamp ASC;
+                    ''', [uid])
+    messages = curs.fetchall()
+    print(messages)  # Check if all messages are fetched
+    
+    return render_template('messages.html', page_title='Your Messages', messages=messages)
+
+# Route to send a message to another user based on a listing -- also not rly working yet lolz
+@app.route('/send_message/<int:lis_id>', methods=['GET', 'POST'])
+def send_message(lis_id):
+    # if 'uid' not in session:
+    #     flash("Login to send messages!")
+    #     return redirect(url_for('index'))
+    # sender_uid = session['uid']
+    sender_uid = 1 #temporary for testing
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+
+    # get the lister_uid for the desired listing
+    curs.execute('''select uid from listing where lis_id = %s;''', [lis_id])
+    lister_uid_row = curs.fetchone()
+    if not lister_uid_row:
+        flash("No listing found.")
+        return redirect(url_for('index'))
+    lister_uid = lister_uid_row['uid']
+
+    if request.method == 'POST':
+        # insert the new message into the database
+        message_text = request.form['message']
+        curs.execute('''insert into message (lis_id, lister_uid, sender_uid, time_stamp) 
+                        values (%s, %s, %s, now());''', [lis_id, lister_uid, sender_uid])
+        conn.commit()
+        flash("Message sent!")
+        return redirect(url_for('view_messages'))
+
+    # Render message form
+    return render_template('send_message.html', page_title='Send Message', lis_id=lis_id)
+
 
 if __name__ == '__main__':
     import sys, os
@@ -217,7 +287,7 @@ if __name__ == '__main__':
         port = int(sys.argv[1])
         assert(port>1024)
     else:
-        port = os.getuid()
+        port = 5000
     # set this local variable to 'wmdb' or your personal or team db
     db_to_use = 'team8_db' 
     print(f'will connect to {db_to_use}')
