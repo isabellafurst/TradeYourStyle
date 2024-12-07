@@ -10,7 +10,7 @@ CREATE TABLE `user` (
   `uid` integer not null PRIMARY KEY AUTO_INCREMENT,
   `username` varchar(50) not null,
   `display_name` varchar(30),
-  'hashed' char(60),
+  hashed char(60),
   unique(username),
   index(username),
   `email` varchar(50)
