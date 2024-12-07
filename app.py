@@ -44,7 +44,6 @@ def index():
     curs = dbi.dict_cursor(conn)
     return render_template('greet.html',
                            page_title='Login Page')
-
 #Listing page
 @app.route('/main/')
 def main():
@@ -195,7 +194,7 @@ def search_listings():
         return render_template('search.html', listings=listings)
     except Exception as error:
         flash(f"Error with the search query: {str(error)}")
-        return redirect(url_for('index'))
+        return redirect(url_for('main'))
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -259,7 +258,7 @@ def add_listing():
 
         flash("Item successfully added!")
 
-        return redirect(url_for("index"))
+        return redirect(url_for("main"))
 
     return render_template('add_listing.html')
 
@@ -273,7 +272,7 @@ def add_listing():
 
 #     if listing is None:
 #         flash("Listing not found.")
-#         return redirect(url_for('index'))
+#         return redirect(url_for('main'))
 
 #     return render_template('view_listing.html', listing=listing)
 
@@ -283,7 +282,7 @@ def view_messages():
     # Once login is set up, we can use sessions:
     # if 'uid' not in session: 
     #     flash("Login to view your messages!")
-    #     return redirect(url_for('index'))
+    #     return redirect(url_for('main'))
     # uid = session['uid']
     uid = 1  # temporary for testing
     conn = dbi.connect()
@@ -306,7 +305,7 @@ def view_messages():
 def send_message(lis_id):
     # if 'uid' not in session:
     #     flash("Login to send messages!")
-    #     return redirect(url_for('index'))
+    #     return redirect(url_for('main'))
     # sender_uid = session['uid']
     sender_uid = 1 #temporary for testing
     conn = dbi.connect()

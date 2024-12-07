@@ -5,12 +5,14 @@ use team8_db;
 drop table if exists `message`;
 drop table if exists listing;
 drop table if exists user;
-drop table if exists userpass;
 
 CREATE TABLE `user` (
   `uid` integer not null PRIMARY KEY AUTO_INCREMENT,
-  `username` varchar(30),
+  `username` varchar(50) not null,
   `display_name` varchar(30),
+  hashed char(60),
+  unique(username),
+  index(username),
   `email` varchar(50)
 )
 ENGINE = InnoDB;
@@ -41,15 +43,6 @@ CREATE TABLE `message` (
 )
 ENGINE = InnoDB;
 
-create table userpass(
-       uid int auto_increment,
-       username varchar(50) not null,
-       hashed char(60),
-       unique(username),
-       index(username),
-       primary key (uid)
-)
-ENGINE = InnoDB;
 
 ALTER TABLE `listing` ADD FOREIGN KEY (`uid`) REFERENCES `user` (`uid`) on update cascade on delete cascade;
 
