@@ -8,7 +8,7 @@ conn = dbi.connect()
 #team databse
 
 def insert_user(conn, username, password, verbose=False):
-    '''inserts given username & password into the userpass table.  
+    '''inserts given username & password into the user table.  
 Returns three values: the uid, whether there was a duplicate key error, 
 and either false or an exception object.
     '''
@@ -16,7 +16,7 @@ and either false or an exception object.
                            bcrypt.gensalt())
     curs = dbi.cursor(conn)
     try: 
-        curs.execute('''INSERT INTO userpass(username, hashed) 
+        curs.execute('''INSERT INTO user(username, hashed) 
                         VALUES(%s, %s)''',
                      [username, hashed.decode('utf-8')])
         conn.commit()
@@ -41,7 +41,7 @@ def login_user(conn, username, password):
 Returns True if success and returns the uid as the second value.
 Otherwise, False, False.'''
     curs = dbi.cursor(conn)
-    curs.execute('''SELECT uid, hashed FROM userpass 
+    curs.execute('''SELECT uid, hashed FROM user 
                     WHERE username = %s''',
                  [username])
     row = curs.fetchone()
@@ -60,7 +60,7 @@ Otherwise, False, False.'''
 
 def delete_user(conn, username):
     curs = dbi.cursor(conn)
-    curs.execute('''DELETE FROM userpass WHERE username = %s''',
+    curs.execute('''DELETE FROM user WHERE username = %s''',
                  [username])
     conn.commit()
 
