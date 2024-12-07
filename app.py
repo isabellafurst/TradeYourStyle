@@ -158,13 +158,8 @@ def image(id):
 def add_listing():
     if request.method == "POST":
         form_data = request.form
-<<<<<<< HEAD
 
-        uid = request.cookies.get('uid')
-
-=======
         uid = request.cookies.get('uid') # use sessions here instead
->>>>>>> 6d459d38d5948165ae305e30baa16431db5669fc
         conn = dbi.connect()
         curs = dbi.dict_cursor(conn)
 

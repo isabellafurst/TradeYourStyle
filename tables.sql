@@ -38,7 +38,8 @@ CREATE TABLE `message` (
   `sender_uid` int not null,  -- The user sending the message
   `time_stamp` datetime,
   `message_text` varchar(100) NOT NULL
-);
+)
+ENGINE = InnoDB;
 
 ALTER TABLE `listing` ADD FOREIGN KEY (`uid`) REFERENCES `user` (`uid`) on update cascade on delete cascade;
 
