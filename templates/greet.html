@@ -1,10 +1,10 @@
+
 {% extends "base.html" %}
 
 {% block main_content %}
 <h1>Welcome to TradeYourStyle!</h1>
 
-<!-- <p>For a greeting by name, visit this <a href="{{ url_for('index') }}">greeting</a> page.</p> -->
-<p>Click to <a href="{{ url_for('index') }}">return to the main page</a>.</p>
+<p>Click to <a href="{{ url_for('main') }}">return to the main page</a>.</p>
 
 <p>Please login or join, using one of the forms below:</p>
 
@@ -41,29 +41,3 @@ $("#joinform").on('submit', function (event) {
 });
 </script>
 {% endblock %}
-
-<form id="logoutform" action="{{url_for('logout')}}">
-    <button type="submit">logout</button>
-</form>
-
-
-{% for listing in listings %}
-
-<div class = "listing-card">
-    <img src="{{listing['item_image']}}" alt = "Image">
-    <div class = "listing-details">
-        <h3>{{listing['display_name']}}</h3>
-        <p class="list-attr">{{listing['item_desc']}}</p>
-        <div class = "listing-details2">
-        <p class="list-attr">Type: {{ listing['item_type'] }}</p>
-        <p class="list-attr">Color: {{ listing['item_color'] }}</p>
-        <p class="list-attr">Usage: {{ listing['item_usage'] }}</p>
-        <p class="list-attr">Price: {{ listing['item_price'] }}</p>
-        <p class="list-attr">Size: {{ listing['item_size'] }}</p>
-    </div>
-    </div>
-</div>
-
-{% endfor %}
-
-

@@ -5,7 +5,7 @@ use team8_db;
 drop table if exists `message`;
 drop table if exists listing;
 drop table if exists user;
-
+drop table if exists userpass;
 
 CREATE TABLE `user` (
   `uid` integer not null PRIMARY KEY AUTO_INCREMENT,
@@ -37,6 +37,16 @@ CREATE TABLE `message` (
   `lister_uid` int not null,
   `comment_uid` int not null,
   `time_stamp` datetime
+)
+ENGINE = InnoDB;
+
+create table userpass(
+       uid int auto_increment,
+       username varchar(50) not null,
+       hashed char(60),
+       unique(username),
+       index(username),
+       primary key (uid)
 )
 ENGINE = InnoDB;
 
