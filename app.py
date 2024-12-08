@@ -76,7 +76,7 @@ def join():
     session['uid'] = uid
     session['logged_in'] = True
     session['visits'] = 1
-    return redirect( url_for('user', username=username) )
+    return redirect( url_for('main') )
 
 @app.route('/login/', methods=["POST"])
 def login():
@@ -94,7 +94,7 @@ def login():
     session['uid'] = uid
     session['logged_in'] = True
     session['visits'] = 1
-    return redirect( url_for('user', username=username) )
+    return redirect( url_for('main') )
 
 @app.route('/user/<username>')
 def user(username):
