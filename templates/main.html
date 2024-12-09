@@ -3,6 +3,7 @@
 {% block main_content %}
 <h1>Welcome to TradeYourStyle!</h1>
 
+<div class="listing-grid">
 {% for listing in listings %}
 <div class="listing-card">
     <img src="{{ url_for('image', id=listing['lis_id']) }}" alt="{{ listing['item_image'] }}">
@@ -20,4 +21,5 @@
     </div>
 </div>
 {% endfor %}
+</div>
 {% endblock %}
