@@ -240,8 +240,7 @@ def add_listing():
             trade_type = 1
  
         curs.execute('''insert into listing(uid, item_desc, item_type, item_color, item_usage, item_price, item_size, trade_type, item_status)
-        values(%s, %s, %s, %s, %s, %s, %s, %s, 1);''', [2, item_desc, item_type, item_color, item_usage, item_price, item_size, trade_type])
-            # replace 2 with uid later!
+        values(%s, %s, %s, %s, %s, %s, %s, %s, 1);''', [uid, item_desc, item_type, item_color, item_usage, item_price, item_size, trade_type])
         conn.commit()
 
         curs.execute('''select last_insert_id() as last_id;''')
@@ -258,7 +257,7 @@ def add_listing():
             return render_template("add_listing.html")
         if file and allowed_file(user_filename):
             ext = user_filename.split('.')[-1]
-            filename = secure_filename('{}_{}.{}'.format("2", lis_id, ext)) # replace 2 with uid later!
+            filename = secure_filename('{}_{}.{}'.format(uid, lis_id, ext))
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
         curs.execute('''update listing set item_image = %s where lis_id = %s''', [filename, lis_id])
