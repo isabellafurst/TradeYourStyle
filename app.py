@@ -47,13 +47,17 @@ def index():
 #Listing page
 @app.route('/main/')
 def main():
+    if "username" in session:
+        user = True
+    else:
+        user = False
     conn = dbi.connect()
     curs = dbi.dict_cursor(conn)
     curs.execute('''select lis_id, 'uid', item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
                   from listing, user where listing.uid = user.uid order by post_date DESC;''')
     listings = curs.fetchall()
     return render_template('main.html',
-                           page_title='Main Page', listings = listings)
+                           page_title='Main Page', listings = listings, user = user)
 
 @app.route('/join/', methods=["POST"])
 def join():
