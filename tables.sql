@@ -2,7 +2,7 @@
 
 use team8_db; 
 
-drop table if exists `message`;
+DROP TABLE IF EXISTS comment;
 drop table if exists listing;
 drop table if exists user;
 
@@ -33,21 +33,18 @@ CREATE TABLE `listing` (
 )
 ENGINE = InnoDB;
 
-CREATE TABLE `message` (
-  `mid` int PRIMARY KEY AUTO_INCREMENT,
-  `lis_id` int not null,
-  `lister_uid` int not null,
-  `sender_uid` int not null,  -- The user sending the message
-  `time_stamp` datetime,
-  `message_text` varchar(100) NOT NULL
+CREATE TABLE `comment` (
+  `cid` INT AUTO_INCREMENT PRIMARY KEY,
+  `lis_id` INT NOT NULL,
+  `uid` INT NOT NULL,
+  `parent_id` INT DEFAULT NULL,
+  `text` TEXT NOT NULL,
+  `post_date` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`lis_id`) REFERENCES `listing`(`lis_id`) ON DELETE CASCADE,
+  FOREIGN KEY (`uid`) REFERENCES `user`(`uid`) ON DELETE CASCADE,
+  FOREIGN KEY (`parent_id`) REFERENCES `comment`(`cid`) ON DELETE SET NULL
 )
-ENGINE = InnoDB;
+ENGINE=InnoDB;
 
 
 ALTER TABLE `listing` ADD FOREIGN KEY (`uid`) REFERENCES `user` (`uid`) on update cascade on delete cascade;
-
-ALTER TABLE `message` ADD FOREIGN KEY (`lis_id`) REFERENCES `listing` (`lis_id`) on update cascade on delete cascade;
-
-ALTER TABLE `message` ADD FOREIGN KEY (`lister_uid`) REFERENCES `user` (`uid`) on update cascade on delete cascade;
-
-ALTER TABLE `message` ADD FOREIGN KEY (`sender_uid`) REFERENCES `user` (`uid`) on update cascade on delete cascade;

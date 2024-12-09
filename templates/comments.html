@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+<h1>Comments for Listing</h1>
+
+<!-- listing info -->
+<div class="listing-card">
+    <img src="{{ url_for('image', id=listing['lis_id']) }}" alt="Listing Image">
+    <div class="listing-details">
+        <p>{{ listing['item_desc'] }}</p>
+        <p>Type: {{ listing['item_type'] }}</p>
+        <p>Color: {{ listing['item_color'] }}</p>
+        <p>Usage: {{ listing['item_usage'] }}</p>
+        <p>Price: ${{ listing['item_price'] }}</p>
+    </div>
+</div>
+
+<!-- section for comments -->
+<h2>Comments</h2>
+{% if comments %}
+    <ul>
+{% for comment in comments %}
+    <p>{{ comment['text'] }}</p>
+    <p><b><small> {{ comment['user']['username'] }}</b></small></p>  <!-- make the user data kinda cute-ish -->
+{% endfor %}
+        </ul>
+{% else %}
+    <p>No comments yet.</p>
+{% endif %}
+
+<!-- form to submit comments NOT WORKING PROPERLY?? sessions issue :() -->
+{% if session.get('uid') %}
+    <form method="POST" action="{{ url_for('add_comment', lis_id=listing['lis_id']) }}">
+        <textarea name="comment_text" required placeholder="Add a comment"></textarea><br>
+        <button type="submit">Post Comment</button>
+    </form>
+{% else %}
+    <p>You must be logged in to comment.</p>
+{% endif %}
+
+
+{% endblock %}

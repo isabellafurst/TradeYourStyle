@@ -311,61 +311,52 @@ def bio():
 
 #     return render_template('view_listing.html', listing=listing)
 
-# Route to view a user's own messages
-@app.route('/messages/')
-def view_messages():
-    # Once login is set up, we can use sessions:
-    # if 'uid' not in session: 
-    #     flash("Login to view your messages!")
-    #     return redirect(url_for('main'))
-    # uid = session['uid']
-    uid = 1  # temporary for testing
+def get_user_by_id(uid): #helper function to get a username from uid
     conn = dbi.connect()
     curs = dbi.dict_cursor(conn)
-    curs.execute('''select m.mid, m.time_stamp, u.display_name as sender, 
-                    m.message_text, l.item_desc, m.lis_id 
-                    from message m
-                    join user u on m.sender_uid = u.uid 
-                    join listing l on m.lis_id = l.lis_id 
-                    where m.lis_id = %s  
-                    order by m.time_stamp ASC;
-                    ''', [uid])
-    messages = curs.fetchall()
-    print(messages)  # Check if all messages are fetched
-    
-    return render_template('messages.html', page_title='Your Messages', messages=messages)
+    curs.execute('select username from user where uid = %s', [uid])
+    user = curs.fetchone()
+    return user
 
-# Route to send a message to another user based on a listing -- also not rly working yet lolz
-@app.route('/send_message/<int:lis_id>', methods=['GET', 'POST'])
-def send_message(lis_id):
-    # if 'uid' not in session:
-    #     flash("Login to send messages!")
-    #     return redirect(url_for('main'))
-    # sender_uid = session['uid']
-    sender_uid = 1 #temporary for testing
+@app.route('/listing/<int:lis_id>')
+def view_comments(lis_id):
+    print(session)  #debug statement
     conn = dbi.connect()
     curs = dbi.dict_cursor(conn)
 
-    # get the lister_uid for the desired listing
-    curs.execute('''select uid from listing where lis_id = %s;''', [lis_id])
-    lister_uid_row = curs.fetchone()
-    if not lister_uid_row:
-        flash("No listing found.")
-        return redirect(url_for('index'))
-    lister_uid = lister_uid_row['uid']
+    curs.execute('''select lis_id, item_desc as item_name, item_type, item_color, item_usage, item_price, item_size, item_image 
+                    from listing 
+                    where lis_id = %s''', [lis_id])
+    listing = curs.fetchone()
 
-    if request.method == 'POST':
-        # insert the new message into the database
-        message_text = request.form['message']
-        curs.execute('''insert into message (lis_id, lister_uid, sender_uid, time_stamp) 
-                        values (%s, %s, %s, now());''', [lis_id, lister_uid, sender_uid])
-        conn.commit()
-        flash("Message sent!")
-        return redirect(url_for('view_messages'))
+    # comments for  listing
+    curs.execute('select text, post_date, uid from comment where lis_id = %s', [lis_id])
+    comments = curs.fetchall()
 
-    # Render message form
-    return render_template('send_message.html', page_title='Send Message', lis_id=lis_id)
+    # user info for comments
+    for comment in comments:
+        user = get_user_by_id(comment['uid']) 
+        comment['user'] = user  
 
+    return render_template('comments.html', listing=listing, comments=comments)
+
+@app.route('/listing/<int:lis_id>/add_comment', methods=['POST'])
+def add_comment(lis_id):
+    comment_text = request.form.get('comment_text')
+    uid = session.get('uid')  # session to check if user is logged in -- something here is Not Working
+
+    if not uid:
+        flash("You must be logged in to comment.")
+        return redirect(url_for('view_comments', lis_id=lis_id))  #redirects to viewing comments
+
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''insert into comment (lis_id, uid, text, post_date)
+                    values (%s, %s, %s, now())''',
+                [lis_id, uid, comment_text])
+    conn.commit()
+    flash("Comment submitted!")
+    return redirect(url_for('view_comments', lis_id=lis_id)) #redirects to viewing comments
 
 if __name__ == '__main__':
     import sys, os
