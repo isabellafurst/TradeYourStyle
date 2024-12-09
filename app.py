@@ -54,7 +54,7 @@ def main():
     if "username" in session:
         conn = dbi.connect()
         curs = dbi.dict_cursor(conn)
-        curs.execute('''select lis_id, 'uid', item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
+        curs.execute('''select lis_id, 'uid', username, item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
                   from listing, user where listing.uid = user.uid order by post_date DESC;''')
         listings = curs.fetchall()
         return render_template('main.html',
@@ -199,7 +199,7 @@ def search_listings():
         curs.execute(query, tuple(filters))  # actually execute the query (u wanna work sooooo bad)
         listings = curs.fetchall()
 
-        return render_template('search.html', listings=listings)
+        return render_template('search.html', listings=listings, user = user)
     except Exception as error:
         flash(f"Error with the search query: {str(error)}")
         return redirect(url_for('main'))

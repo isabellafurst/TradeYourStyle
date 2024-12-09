@@ -6,6 +6,7 @@
 <div class="listing-grid">
 {% for listing in listings %}
 <div class="listing-card">
+    <h3>{{listing['username']}}</h3>
     <img src="{{ url_for('image', id=listing['lis_id']) }}" alt="{{ listing['item_image'] }}">
     <div class="listing-details">
         <h3>{{ listing['display_name'] }}</h3>
