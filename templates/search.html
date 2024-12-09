@@ -21,7 +21,22 @@
 <!-- Need template inherritance here -- get it from add_listing -->
 <div>
     <label for="item_color">Color:</label>
-    {% include "_item_color_dropdown.html" with name="item_color" id="item_color" multiple=True %}
+    <select name="item_color" id="item_color" multiple>
+        <option value="multicolor">Multicolor</option>
+        <option value="black">Black</option>
+        <option value="white">White</option>
+        <option value="brown">Brown</option>
+        <option value="gray">Gray</option>
+        <option value="red">Red</option>
+        <option value="orange">Orange</option>
+        <option value="yellow">Yellow</option>
+        <option value="green">Green</option>
+        <option value="blue">Blue</option>
+        <option value="purple">Purple</option>
+        <option value="pink">Pink</option>
+        <option value="gold">Gold</option>
+        <option value="silver">Silver</option>
+    </select>
 </div>
 
     <div>
