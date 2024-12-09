@@ -2,16 +2,7 @@ from flask import (Flask, render_template, make_response, url_for, request,
                    redirect, flash, session, send_from_directory, jsonify)
 from werkzeug.utils import secure_filename
 
-ALLOWED_EXTENSIONS = { 'png', 'jpg', 'jpeg'}
-
-
-
 app = Flask(__name__)
-
-
-# one or the other of these. Defaults to MySQL (PyMySQL)
-# change comment characters to switch to SQLite
-
 import os
 
 import cs304dbi as dbi
@@ -20,6 +11,7 @@ import pymysql
 import bcrypt
 import tradeyourstyle_login as auth
 
+ALLOWED_EXTENSIONS = { 'png', 'jpg', 'jpeg'}
 
 # import cs304dbi_sqlite3 as dbi
 
@@ -37,9 +29,12 @@ app.config['TRAP_BAD_REQUEST_ERRORS'] = True
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 1*1024*1024 # 1 MB
 
-#Home page with user login/join 
 @app.route('/')
 def index():
+    """ 
+    Loads the login page
+    Checks if a user is logged in and provides the appropriate response.
+    """
     if "username" in session:
         user = True
     else:
@@ -51,6 +46,9 @@ def index():
 #Listing page
 @app.route('/main/')
 def main():
+    """
+    If the user is logged in, get all listings from the database Listing table and display them.
+    """
     if "username" in session:
         conn = dbi.connect()
         curs = dbi.dict_cursor(conn)
@@ -65,6 +63,10 @@ def main():
 
 @app.route('/join/', methods=["POST"])
 def join():
+    """
+    Allows for users to join TradeYourStyle by registering a new user.
+    Doesn't allow for duplicates of usernames.
+    """
     username = request.form.get('username')
     passwd1 = request.form.get('password1')
     passwd2 = request.form.get('password2')
@@ -88,6 +90,12 @@ def join():
 
 @app.route('/login/', methods=["POST"])
 def login():
+    """
+    For user login. Logs users in if their username and password is valid, and
+    then redirects to main page if successful.
+
+    Otherwise, redirects to login page.
+    """
     username = request.form.get('username')
     passwd = request.form.get('password')
     conn = dbi.connect()
@@ -104,8 +112,10 @@ def login():
     session['visits'] = 1
     return redirect( url_for('main') )
 
-@app.route('/user/<username>')
 def user(username):
+    """
+    Passes username to user table and stores it.
+    """
     try:
         # don't trust the URL; it's only there for decoration
         if 'username' in session:
@@ -126,6 +136,10 @@ def user(username):
 
 @app.route('/logout/')
 def logout():
+    """
+    Clears session and logs user out of the app.
+    Redirects user to the login page afterwards.
+    """
     if 'username' in session:
         username = session['username']
         session.pop('username')
@@ -137,9 +151,42 @@ def logout():
         flash('you are not logged in. Please login or join')
         return redirect( url_for('index') )
     
+@app.route('/bio/')
+def bio():
+    if "username" in session:
+        
+        conn = dbi.connect()
+        curs = dbi.dict_cursor(conn)
+
+        uid = session['uid']
+
+        curs.execute('''select username, display_name, email from user where uid = %s;''', [uid])
+        user = curs.fetchone()
+
+        curs.execute('''select lis_id, 'uid', item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
+                  from listing where uid = %s order by post_date DESC;''', [uid])
+        listings = curs.fetchall()
+
+        list_num = len(listings)
+
+
+        return render_template('bio_page.html', listings = listings, user = user, list_num = list_num)
+
+
+
+    else:
+        flash("You do not have access, please log in or sign up")
+        return redirect(url_for("index"))
+
+
 @app.route('/search/', methods=['GET'])
 # New route merges search_listings functions to include filtering
 def search_listings():
+    """
+    Allows users to search and filter the listings on the site.
+    Based on applied filters and text input in the search bar, 
+    relevant listings will be displayed.
+    """
     item_type = request.args.getlist('item_type')  
     item_color = request.args.getlist('item_color')
     item_usage = request.args.getlist('item_usage')
@@ -204,23 +251,13 @@ def search_listings():
         flash(f"Error with the search query: {str(error)}")
         return redirect(url_for('main'))
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-@app.route('/image/<id>')
-def image(id):
-    conn = dbi.connect()
-    curs = dbi.dict_cursor(conn)
-    curs.execute(
-        '''select item_image from listing where lis_id = %s;''',
-        [id])
-    pic = curs.fetchone()
-    return send_from_directory(app.config['UPLOAD_FOLDER'], pic['item_image'])
-
-
 @app.route('/add/', methods=['GET','POST'])
 def add_listing():
+    """
+    Functionality for adding a new listing into the database.
+    Capable of creating form for new listings (including file upload + validation), 
+    and redirects to main page after posting.
+    """
     if request.method == "POST":
         form_data = request.form
 
@@ -269,48 +306,32 @@ def add_listing():
 
     return render_template('add_listing.html')
 
-@app.route('/bio/')
-def bio():
-    if "username" in session:
-        
-        conn = dbi.connect()
-        curs = dbi.dict_cursor(conn)
+def allowed_file(filename):
+    """
+    Helper Function: checks if the user uploaded file has an allowed extension (png, jpg, jpeg)
+    """
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-        uid = session['uid']
+@app.route('/image/<id>')
+def image(id):
+    """
+    Function for displaying the image associated with a listing.
+    Returns the image file from uploads folder.
+    """
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    curs.execute(
+        '''select item_image from listing where lis_id = %s;''',
+        [id])
+    pic = curs.fetchone()
+    return send_from_directory(app.config['UPLOAD_FOLDER'], pic['item_image'])
 
-        curs.execute('''select username, display_name, email from user where uid = %s;''', [uid])
-        user = curs.fetchone()
 
-        curs.execute('''select lis_id, 'uid', item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
-                  from listing where uid = %s order by post_date DESC;''', [uid])
-        listings = curs.fetchall()
-
-        list_num = len(listings)
-
-
-        return render_template('bio_page.html', listings = listings, user = user, list_num = list_num)
-
-
-
-    else:
-        flash("You do not have access, please log in or sign up")
-        return redirect(url_for("index"))
-
-# @app.route('/listing/<int:lis_id>') Might need this for messaging purposes, but right now it's pissing me AWF <3
-# def view_listing(lis_id):
-#     conn = dbi.connect()
-#     curs = dbi.dict_cursor(conn)
-#     curs.execute('''select item_desc, item_type, item_color, item_usage, item_price, item_size, trade_type, item_status
-#                     from listing where lis_id = %s;''', [lis_id])
-#     listing = curs.fetchone()
-
-#     if listing is None:
-#         flash("Listing not found.")
-#         return redirect(url_for('main'))
-
-#     return render_template('view_listing.html', listing=listing)
-
-def get_user_by_id(uid): #helper function to get a username from uid
+def get_user_by_id(uid): 
+    """
+    Helper function: gets the username of a user from their user ID
+    """
     conn = dbi.connect()
     curs = dbi.dict_cursor(conn)
     curs.execute('select username from user where uid = %s', [uid])
@@ -319,6 +340,10 @@ def get_user_by_id(uid): #helper function to get a username from uid
 
 @app.route('/listing/<int:lis_id>')
 def view_comments(lis_id):
+    """
+    Display comments for a particular listing.
+    This gets details and other comments from the database that are relevant to the specific listing.
+    """
     print(session)  #debug statement
     conn = dbi.connect()
     curs = dbi.dict_cursor(conn)
@@ -341,6 +366,10 @@ def view_comments(lis_id):
 
 @app.route('/listing/<int:lis_id>/add_comment', methods=['POST'])
 def add_comment(lis_id):
+    """
+    Allows user to add comment to a listing after validating the session.
+    Will redirect user to the comments page for a specific listing.
+    """
     comment_text = request.form.get('comment_text')
     uid = session.get('uid')  # session to check if user is logged in -- something here is Not Working
 
@@ -358,6 +387,9 @@ def add_comment(lis_id):
     return redirect(url_for('view_comments', lis_id=lis_id)) #redirects to viewing comments
 
 if __name__ == '__main__':
+    """
+    Runs the Flask app by getting database connected and starting server on specific port.
+    """
     import sys, os
     if len(sys.argv) > 1:
         # arg, if any, is the desired port number
