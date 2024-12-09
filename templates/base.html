@@ -10,11 +10,17 @@
     {% block head_stuff %} {% endblock %}
 
     <!-- the search bar -->
+     {% if user %}
     <form action="/search" method="GET">
       <input type="text" name="query" placeholder="Search listings..." class="search-bar" />
       <button type="submit" class="search-button">Search</button>
 
     </form>
+
+    <form id="logoutform" action="{{url_for('logout')}}">
+      <button type="submit">logout</button>
+    </form>
+    {% endif %}
     
 </head>
 <body>
@@ -30,14 +36,17 @@
 {% endwith %}
             
 {% block nav %}
+{% if user %}
 <nav>
   <ul>
     <li><a href="{{url_for('main')}}">Home</a></li>
     <li><a href="{{url_for('add_listing')}}">Add Listing</a></li>
     <li><a href="{{url_for('view_messages')}}">Messages</a></li>
+    <li><a href="{{url_for('bio')}}">Bio</a></li>
 
   </ul>
 </nav>
+{% endif %}
 {% endblock %}
 
 {% block main_content %}
