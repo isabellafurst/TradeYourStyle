@@ -40,6 +40,10 @@ app.config['MAX_CONTENT_LENGTH'] = 1*1024*1024 # 1 MB
 #Home page with user login/join 
 @app.route('/')
 def index():
+    if "username" in session:
+        user = True
+    else:
+        user = False
     conn = dbi.connect()
     curs = dbi.dict_cursor(conn)
     return render_template('greet.html',
@@ -48,16 +52,16 @@ def index():
 @app.route('/main/')
 def main():
     if "username" in session:
-        user = True
-    else:
-        user = False
-    conn = dbi.connect()
-    curs = dbi.dict_cursor(conn)
-    curs.execute('''select lis_id, 'uid', item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
+        conn = dbi.connect()
+        curs = dbi.dict_cursor(conn)
+        curs.execute('''select lis_id, 'uid', item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
                   from listing, user where listing.uid = user.uid order by post_date DESC;''')
-    listings = curs.fetchall()
-    return render_template('main.html',
+        listings = curs.fetchall()
+        return render_template('main.html',
                            page_title='Main Page', listings = listings, user = user)
+    else:
+        flash("Please log in or sign up to see listings")
+        return redirect(url_for("index"))
 
 @app.route('/join/', methods=["POST"])
 def join():
@@ -220,7 +224,7 @@ def add_listing():
     if request.method == "POST":
         form_data = request.form
 
-        uid = request.cookies.get('uid') # use sessions here instead
+        uid = session['uid'] # use sessions here instead
         conn = dbi.connect()
         curs = dbi.dict_cursor(conn)
 
@@ -265,6 +269,33 @@ def add_listing():
         return redirect(url_for("main"))
 
     return render_template('add_listing.html')
+
+@app.route('/bio/')
+def bio():
+    if "username" in session:
+        
+        conn = dbi.connect()
+        curs = dbi.dict_cursor(conn)
+
+        uid = session['uid']
+
+        curs.execute('''select username, display_name, email from user where uid = %s;''', [uid])
+        user = curs.fetchone()
+
+        curs.execute('''select lis_id, 'uid', item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
+                  from listing where uid = %s order by post_date DESC;''', [uid])
+        listings = curs.fetchall()
+
+        list_num = len(listings)
+
+
+        return render_template('bio_page.html', listings = listings, user = user, list_num = list_num)
+
+
+
+    else:
+        flash("You do not have access, please log in or sign up")
+        return redirect(url_for("index"))
 
 # @app.route('/listing/<int:lis_id>') Might need this for messaging purposes, but right now it's pissing me AWF <3
 # def view_listing(lis_id):

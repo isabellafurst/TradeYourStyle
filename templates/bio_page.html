@@ -1,7 +1,16 @@
 {% extends "base.html" %}
 
 {% block main_content %}
-<h1>Welcome to TradeYourStyle!</h1>
+<h1>{{user['display_name']}}'s Personal Page</h1>
+
+<h3>Info:</h3>
+
+<p>Username: {{user['username']}}</p>
+<p>Display Name: {{user['display_name']}}</p>
+<p>Email: {{user['email']}}</p>
+<p>Number of Listings: {{list_num}}</p>
+
+<h3>Your Listings:</h3>
 
 {% for listing in listings %}
 
