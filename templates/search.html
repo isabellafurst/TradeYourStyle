@@ -2,7 +2,6 @@
 
 {% block main_content %}
 <h1>Search Filtered Listings</h1>
-
 <form action="{{url_for('search_listings')}}" method="get">
     <div>
         <label for="item_type">Item Type:</label>
@@ -103,13 +102,35 @@
         <p class="list-attr">Size: {{ listing['item_size'] }}</p>
     </div>
     </div>
-</div>
+        <!-- Comments Section -->
+        <div class="comments-section">
+            <h4>Add a comment: </h4>
+            {% if listing['comments'] %}
+                <ul>
+                    {% for comment in listing['comments'] %}
+                    <div class="comment-box">
+                        <p class="comment-text">{{ comment['text'] }}</p>
+                        <p class="comment-user"><b><small>{{ comment['user']['username'] }}</small></b></p>
+                        <p class="comment-date">{{ comment['post_date'] }}</p>
+                    </div>
+                    {% endfor %}
+                </ul>
+            {% endif %}
 
-{% else %}
+            <!-- Add Comment Form -->
+            {% if session.get('uid') %}
+                <form method="POST" action="{{ url_for('add_comment', lis_id=listing['lis_id']) }}">
+                    <textarea name="comment_text" required placeholder="Add a comment"></textarea><br>
+                    <button type="submit">Post Comment</button>
+                </form>
+            {% else %}
+                <p>You must be logged in to comment.</p>
+            {% endif %}
+        </div>
+        <a href="{{ url_for('view_comments', lis_id=listing['lis_id']) }}" class="view-comments-link">View Comments</a>
+    </div>
+    {% else %}
         <p>No listings found matching your criteria.</p>
-
-{% endfor %}
+    {% endfor %}
 
 {% endblock %}
-
-
