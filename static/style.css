@@ -114,16 +114,12 @@ nav button:hover, button:focus, nav a:hover, nav a:focus {
     background-color: var(--color-focus);
 }
 
-/* stuff for comments */
-.comment {
-    margin: 10px 0;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+/* for comment */
+/* Comment Box Styling */
+.comment-box {
+    border: 1px dashed #6B8E23;  
+    border-radius: 8px;       
+    padding: 10px;            
+    margin-bottom: 15px;     
+    background-color: #f3f0f0; 
 }
-
-.comment textarea {
-    width: 100%;
-    margin-top: 5px;
-}
-

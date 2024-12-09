@@ -19,11 +19,14 @@
 <h2>Comments</h2>
 {% if comments %}
     <ul>
-{% for comment in comments %}
-    <p>{{ comment['text'] }}</p>
-    <p><b><small> {{ comment['user']['username'] }}</b></small></p>  <!-- make the user data kinda cute-ish -->
-{% endfor %}
-        </ul>
+        {% for comment in comments %}
+        <div class="comment-box">
+            <p class="comment-text">{{ comment['text'] }}</p>
+            <p class="comment-user"><b><small>{{ comment['user']['username'] }}</small></b></p>
+            <p class="comment-date">{{ comment['post_date'] }}</p>
+        </div>
+    {% endfor %}
+            </ul>
 {% else %}
     <p>No comments yet.</p>
 {% endif %}
