@@ -31,7 +31,6 @@
     <p>No comments yet.</p>
 {% endif %}
 
-<!-- form to submit comments NOT WORKING PROPERLY?? sessions issue :() -->
 {% if session.get('uid') %}
     <form method="POST" action="{{ url_for('add_comment', lis_id=listing['lis_id']) }}">
         <textarea name="comment_text" required placeholder="Add a comment"></textarea><br>
