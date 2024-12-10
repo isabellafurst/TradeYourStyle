@@ -17,7 +17,6 @@
 <div class = "listing-card">
     <img src="{{url_for('image', id=listing['lis_id'])}}" alt ="{{listing['item_image']}}">
     <div class = "listing-details">
-        <h3>{{listing['display_name']}}</h3>
         <p class="list-attr">{{listing['item_desc']}}</p>
         <div class = "listing-details2">
         <p class="list-attr">Type: {{ listing['item_type'] }}</p>
