@@ -87,6 +87,7 @@
 
 <h2>Search Results</h2>
 
+<div class="listing-grid">
 {% for listing in listings %}
 
 <div class = "listing-card">
@@ -132,5 +133,6 @@
     {% else %}
         <p>No listings found matching your criteria.</p>
     {% endfor %}
+</div>
 
 {% endblock %}

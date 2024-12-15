@@ -324,8 +324,12 @@ def image(id):
     curs.execute(
         '''select item_image from listing where lis_id = %s;''',
         [id])
-    pic = curs.fetchone()
-    return send_from_directory(app.config['UPLOAD_FOLDER'], pic['item_image'])
+    pic = curs.fetchone()['item_image']
+
+    if pic:
+        return send_from_directory(app.config['UPLOAD_FOLDER'], pic)
+    else:
+        return "none"
 
 
 def get_user_by_id(uid): 
