@@ -151,6 +151,11 @@ def logout():
     
 @app.route('/bio/')
 def bio():
+    """
+    Collects user information from uid in session.
+    Renders personal bio page with their info and listings. 
+    """
+
     if "username" not in session:
         flash("You do not have access, please log in or sign up")
         return redirect(url_for("index"))
@@ -161,7 +166,7 @@ def bio():
     uid = session['uid']
 
     curs.execute('''select username, display_name, email from user where uid = %s;''', [uid])
-    user = curs.fetchone()
+    person = curs.fetchone()
 
     curs.execute('''select lis_id, 'uid', item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
                 from listing where uid = %s order by post_date DESC;''', [uid])
@@ -170,7 +175,47 @@ def bio():
     list_num = len(listings)
 
 
-    return render_template('bio_page.html', listings = listings, user = user, list_num = list_num)
+    return render_template('bio_page.html', listings = listings, person = person, user = user, list_num = list_num)
+
+@app.route('/edit-bio/', methods=['GET','POST'])
+def edit_bio():
+    """
+    Collects user information from uid in session.
+    Edit form for user to edit their info. 
+    """
+
+    if "username" not in session:
+        flash("You do not have access, please log in or sign up")
+        return redirect(url_for("index"))
+
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+
+    uid = session['uid'] 
+
+    if request.method == "POST":
+        form_data = request.form
+
+        username = form_data['username']
+        display_name = form_data['display']
+        email = form_data['email']
+ 
+        try:
+            curs.execute('''update user set username = %s, display_name = %s, email = %s where uid = %s;''', [username, display_name, email, uid])
+            conn.commit()
+            flash("updated your info!")
+            return redirect(url_for("bio"))
+        except pymysql.err.IntegrityError as err:
+            details = err.args
+            if details[0] == pymysql.constants.ER.DUP_ENTRY:
+                flash("that username is taken, try anotherone!")
+                return redirect(url_for('edit_bio'))
+
+
+    curs.execute('''select username, display_name, email from user where uid = %s;''', [uid])
+    person = curs.fetchone()
+
+    return render_template("edit_bio.html", user = user, person = person)
 
 
 @app.route('/search/', methods=['GET'])
@@ -265,7 +310,7 @@ def add_listing():
     if request.method == "POST":
         form_data = request.form
 
-        uid = session['uid'] # use sessions here instead
+        uid = session['uid'] 
         conn = dbi.connect()
         curs = dbi.dict_cursor(conn)
 
