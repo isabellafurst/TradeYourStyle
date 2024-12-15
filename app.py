@@ -33,14 +33,12 @@ app.config['MAX_CONTENT_LENGTH'] = 1*1024*1024 # 1 MB
 def index():
     """ 
     Loads the login page
-    Checks if a user is logged in and provides the appropriate response.
     """
     if "username" in session:
-        user = True
+       user = True
     else:
-        user = False
-    conn = dbi.connect()
-    curs = dbi.dict_cursor(conn)
+       user = False
+    
     return render_template('greet.html',
                            page_title='Login Page')
 #Listing page
@@ -49,17 +47,17 @@ def main():
     """
     If the user is logged in, get all listings from the database Listing table and display them.
     """
-    if "username" in session:
-        conn = dbi.connect()
-        curs = dbi.dict_cursor(conn)
-        curs.execute('''select lis_id, 'uid', username, item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
-                  from listing, user where listing.uid = user.uid order by post_date DESC;''')
-        listings = curs.fetchall()
-        return render_template('main.html',
-                           page_title='Main Page', listings = listings, user = user)
-    else:
+    if "username" not in session:
         flash("Please log in or sign up to see listings")
         return redirect(url_for("index"))
+
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''select lis_id, 'uid', username, item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
+                from listing, user where listing.uid = user.uid order by post_date DESC;''')
+    listings = curs.fetchall()
+    return render_template('main.html',
+                        page_title='Main Page', listings = listings, user = user)
 
 @app.route('/join/', methods=["POST"])
 def join():
@@ -118,18 +116,18 @@ def user(username):
     """
     try:
         # don't trust the URL; it's only there for decoration
-        if 'username' in session:
-            username = session['username']
-            uid = session['uid']
-            session['visits'] = 1+int(session['visits'])
-            return render_template('greet.html',
-                                   page_title='My App: Welcome {}'.format(username),
-                                   name=username,
-                                   uid=uid,
-                                   visits=session['visits'])
-        else:
+        if 'username' not in session:
             flash('you are not logged in. Please login or join')
             return redirect( url_for('index') )
+
+        username = session['username']
+        uid = session['uid']
+        session['visits'] = 1+int(session['visits'])
+        return render_template('greet.html',
+                                page_title='My App: Welcome {}'.format(username),
+                                name=username,
+                                uid=uid,
+                                visits=session['visits'])
     except Exception as err:
         flash('some kind of error '+str(err))
         return redirect( url_for('index') )
@@ -140,43 +138,39 @@ def logout():
     Clears session and logs user out of the app.
     Redirects user to the login page afterwards.
     """
-    if 'username' in session:
-        username = session['username']
-        session.pop('username')
-        session.pop('uid')
-        session.pop('logged_in')
-        flash('You are logged out')
-        return redirect(url_for('index'))
-    else:
+    if 'username' not in session:
         flash('you are not logged in. Please login or join')
         return redirect( url_for('index') )
+
+    username = session['username']
+    session.pop('username')
+    session.pop('uid')
+    session.pop('logged_in')
+    flash('You are logged out')
+    return redirect(url_for('index'))
     
 @app.route('/bio/')
 def bio():
-    if "username" in session:
-        
-        conn = dbi.connect()
-        curs = dbi.dict_cursor(conn)
-
-        uid = session['uid']
-
-        curs.execute('''select username, display_name, email from user where uid = %s;''', [uid])
-        user = curs.fetchone()
-
-        curs.execute('''select lis_id, 'uid', item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
-                  from listing where uid = %s order by post_date DESC;''', [uid])
-        listings = curs.fetchall()
-
-        list_num = len(listings)
-
-
-        return render_template('bio_page.html', listings = listings, user = user, list_num = list_num)
-
-
-
-    else:
+    if "username" not in session:
         flash("You do not have access, please log in or sign up")
         return redirect(url_for("index"))
+    
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+
+    uid = session['uid']
+
+    curs.execute('''select username, display_name, email from user where uid = %s;''', [uid])
+    user = curs.fetchone()
+
+    curs.execute('''select lis_id, 'uid', item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
+                from listing where uid = %s order by post_date DESC;''', [uid])
+    listings = curs.fetchall()
+
+    list_num = len(listings)
+
+
+    return render_template('bio_page.html', listings = listings, user = user, list_num = list_num)
 
 
 @app.route('/search/', methods=['GET'])
@@ -187,6 +181,12 @@ def search_listings():
     Based on applied filters and text input in the search bar, 
     relevant listings will be displayed.
     """
+
+    if "username" not in session:
+        flash("You do not have access, please log in or sign up")
+        return redirect(url_for("index"))
+
+    
     item_type = request.args.getlist('item_type')  
     item_color = request.args.getlist('item_color')
     item_usage = request.args.getlist('item_usage')
@@ -258,6 +258,10 @@ def add_listing():
     Capable of creating form for new listings (including file upload + validation), 
     and redirects to main page after posting.
     """
+    if "username" not in session:
+        flash("You do not have access, please log in or sign up")
+        return redirect(url_for("index"))
+
     if request.method == "POST":
         form_data = request.form
 
@@ -304,7 +308,7 @@ def add_listing():
 
         return redirect(url_for("main"))
 
-    return render_template('add_listing.html')
+    return render_template('add_listing.html', user = user)
 
 def allowed_file(filename):
     """
@@ -363,10 +367,10 @@ def view_comments(lis_id):
 
     # user info for comments
     for comment in comments:
-        user = get_user_by_id(comment['uid']) 
-        comment['user'] = user  
+        username = get_user_by_id(comment['uid']) 
+        comment['user'] = username  
 
-    return render_template('comments.html', listing=listing, comments=comments)
+    return render_template('comments.html', listing=listing, comments=comments, user = user)
 
 @app.route('/listing/<int:lis_id>/add_comment', methods=['POST'])
 def add_comment(lis_id):
