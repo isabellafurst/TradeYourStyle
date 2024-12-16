@@ -10,7 +10,7 @@
 <p>Email: {{person['email']}}</p>
 <p>Number of Listings: {{list_num}}</p>
 
-<form id="editform" action="{{url_for('edit_bio')}}">
+<form id="editform" method="POST" action="{{url_for('edit_bio')}}">
     <button type="submit">Edit</button>
   </form>
 
@@ -19,7 +19,7 @@
 <div class="listing-grid">
 {% for listing in listings %}
 
-<div class = "listing-card">
+<div class = "listing-card-{{listing['item_status']}}">
     <img src="{{url_for('image', id=listing['lis_id'])}}" alt ="{{listing['item_image']}}">
     <div class = "listing-details">
         <p class="list-attr">{{listing['item_desc']}}</p>
@@ -30,6 +30,19 @@
         <p class="list-attr">Price: {{ listing['item_price'] }}</p>
         <p class="list-attr">Size: {{ listing['item_size'] }}</p>
     </div>
+
+    {% if listing['item_status'] == 1 %}
+        <form id="tradedform" action="{{url_for('bio')}}" method="POST">
+            <input type="hidden" name="id" value="{{ listing['lis_id'] }}">
+            <button type="submit" name="submit" value="traded">Mark as Traded</button>
+        </form>
+    {% elif listing['item_status'] == 0 %}
+    <form id="tradedform" action="{{url_for('bio')}}" method="POST">
+        <input type="hidden" name="id" value="{{ listing['lis_id'] }}">
+        <button type="submit" name="submit" value="available">Mark as Available</button>
+    </form>
+    {% endif %}
+
     </div>
 </div>
 

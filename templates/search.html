@@ -90,7 +90,7 @@
 <div class="listing-grid">
 {% for listing in listings %}
 
-<div class = "listing-card">
+<div class = "listing-card-{{listing['item_status']}}">
     <img src="{{listing['item_image']}}" alt = "Image">
     <div class = "listing-details">
         <h3>{{listing['display_name']}}</h3>

@@ -149,7 +149,7 @@ def logout():
     flash('You are logged out')
     return redirect(url_for('index'))
     
-@app.route('/bio/')
+@app.route('/bio/', methods = ["GET", "POST"])
 def bio():
     """
     Collects user information from uid in session.
@@ -165,6 +165,24 @@ def bio():
 
     uid = session['uid']
 
+    if request.method == "POST":
+        form_data = request.form
+        lis_id = form_data['id']
+
+        if request.form.get('submit') == "traded":
+            
+            curs.execute('''update listing set item_status = 0 where lis_id = %s;''', [lis_id])
+            conn.commit()
+
+            return redirect(url_for("bio"))
+
+        elif request.form.get('submit') == "available":
+
+            curs.execute('''update listing set item_status = 1 where lis_id = %s;''', [lis_id])
+            conn.commit()
+
+            return redirect(url_for("bio"))
+
     curs.execute('''select username, display_name, email from user where uid = %s;''', [uid])
     person = curs.fetchone()
 
@@ -173,7 +191,6 @@ def bio():
     listings = curs.fetchall()
 
     list_num = len(listings)
-
 
     return render_template('bio_page.html', listings = listings, person = person, user = user, list_num = list_num)
 
