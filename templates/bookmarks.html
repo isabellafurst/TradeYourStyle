@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Your Bookmarked Listings</h1>
+
+{% if bookmarks %}
+<div class="listing-grid">
+    {% for bookmark in bookmarks %}
+    <div class="listing-card-{{ bookmark['item_status'] }}">
+        <h3>{{ bookmark['item_desc'] }}</h3>
+        <div class="image">
+            <img src="{{ url_for('image', id=bookmark['lis_id']) }}" alt="{{ bookmark['item_image'] }}">
+        </div>
+        <div class="listing-details">
+            <p class="list-attr">Type: {{ bookmark['item_type'] }}</p>
+            <p class="list-attr">Color: {{ bookmark['item_color'] }}</p>
+            <p class="list-attr">Usage: {{ bookmark['item_usage'] }}</p>
+            <p class="list-attr">Price: ${{ bookmark['item_price'] }}</p>
+            <p class="list-attr">Size: {{ bookmark['item_size'] }}</p>
+        </div>
+        <a href="{{ url_for('view_comments', lis_id=bookmark['lis_id']) }}">View Comments</a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p>You haven't bookmarked any listings yet.</p>
+{% endif %}
+{% endblock %}

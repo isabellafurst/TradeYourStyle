@@ -46,5 +46,13 @@ CREATE TABLE `comment` (
 )
 ENGINE=InnoDB;
 
+CREATE TABLE `bookmarks`(
+  `uid` INT NOT NULL,
+  `lis_id` INT NOT NULL,
+  FOREIGN KEY (`lis_id`) REFERENCES `listing`(`lis_id`) ON DELETE CASCADE,
+  FOREIGN KEY (`uid`) REFERENCES `user`(`uid`) ON DELETE CASCADE
+)
+ENGINE=InnoDB;
+
 
 ALTER TABLE `listing` ADD FOREIGN KEY (`uid`) REFERENCES `user` (`uid`) on update cascade on delete cascade;

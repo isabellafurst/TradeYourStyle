@@ -149,3 +149,19 @@ nav button:hover, button:focus, nav a:hover, nav a:focus {
     margin-bottom: 15px;     
     background-color: #f3f0f0; 
 }
+
+.sold-label {
+    background-color: red;
+    color: white;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+/* Add space between the View Comments link and the SOLD label */
+.listing-details a {
+    margin-bottom: 10px; /* Add space below the View Comments link */
+}

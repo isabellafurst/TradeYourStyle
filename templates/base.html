@@ -11,7 +11,7 @@
 
     <!-- the search bar -->
      {% if user %}
-    <form action="{{url_for('search')}}" method="GET">
+    <form action="{{url_for('search_listings')}}" method="GET">
       <input type="text" name="query" placeholder="Search listings..." class="search-bar" />
       <button type="submit" class="search-button">Search</button>
 

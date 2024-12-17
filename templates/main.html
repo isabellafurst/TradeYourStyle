@@ -4,24 +4,44 @@
 <h1>Welcome to TradeYourStyle!</h1>
 
 <div class="listing-grid">
-{% for listing in listings %}
-<div class="listing-card-{{listing['item_status']}}">
-    <h3>{{listing['username']}}</h3>
-    <div class="image">
-        <img src="{{ url_for('image', id=listing['lis_id']) }}" alt="{{ listing['item_image'] }}">
-    </div>
-    <div class="listing-details">
-        <p class="list-attr">{{ listing['item_desc'] }}</p>
-        <div class="listing-details2">
-            <p class="list-attr">Type: {{ listing['item_type'] }}</p>
-            <p class="list-attr">Color: {{ listing['item_color'] }}</p>
-            <p class="list-attr">Usage: {{ listing['item_usage'] }}</p>
-            <p class="list-attr">Price: {{ listing['item_price'] }}</p>
-            <p class="list-attr">Size: {{ listing['item_size'] }}</p>
+    {% for listing in listings %}
+    <div class="listing-card-{{listing['item_status']}}">
+        <h3>{{listing['username']}}</h3>
+        <div class="image">
+            <img src="{{ url_for('image', id=listing['lis_id']) }}" alt="{{ listing['item_image'] }}">
         </div>
-        <a href="{{ url_for('view_comments', lis_id=listing['lis_id']) }}">View Comments</a>
+        <div class="listing-details">
+            <p class="list-attr">{{ listing['item_desc'] }}</p>
+            <div class="listing-details2">
+                <p class="list-attr">Type: {{ listing['item_type'] }}</p>
+                <p class="list-attr">Color: {{ listing['item_color'] }}</p>
+                <p class="list-attr">Usage: {{ listing['item_usage'] }}</p>
+                <p class="list-attr">Price: {{ listing['item_price'] }}</p>
+                <p class="list-attr">Size: {{ listing['item_size'] }}</p>
+            </div>
+
+            <!-- Conditionally Display SOLD Label -->
+            {% if listing['item_status'] == 0 %}
+                <span class="sold-label">SOLD</span>  <!-- Add SOLD label when item is sold -->
+            {% endif %}
+
+            <a href="{{ url_for('view_comments', lis_id=listing['lis_id']) }}">View Comments</a>
+
+            {% if listing['item_status'] == 1 and listing['uid'] == session['uid'] %}
+            <form method="POST" action="{{ url_for('mark_as_sold', lis_id=listing['lis_id']) }}">
+                <button type="submit">Mark as Sold</button>
+            </form>
+            {% endif %}
+
+            {% if 'username' in session %}
+            <form method="POST" action="{{ url_for('bookmark_listing', lis_id=listing['lis_id']) }}">
+                <button type="submit">Bookmark</button>
+            </form>
+            {% else %}
+            <p>Please login to bookmark listings</p>
+            {% endif %}
+        </div>
     </div>
-</div>
-{% endfor %}
+    {% endfor %}
 </div>
 {% endblock %}

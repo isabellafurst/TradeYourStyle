@@ -337,6 +337,7 @@ def add_listing():
         item_usage = form_data['usage']
         item_price = form_data['price']
         item_size = form_data['size']
+        item_status = 0
         if form_data['trade-type'] == "trade":
             trade_type = 0
         elif form_data['trade-type'] == "free":
@@ -455,6 +456,78 @@ def add_comment(lis_id):
     conn.commit()
     flash("Comment submitted!")
     return redirect(url_for('view_comments', lis_id=lis_id)) #redirects to viewing comments
+
+@app.route('/bookmark/<int:lis_id>/', methods=['POST'])
+def bookmark_listing(lis_id):
+    uid = session.get('uid')  # session to check if user is logged in -- something here is Not Working
+
+    if not uid:
+        flash("You must be logged in to bookmark a listing.")
+        return redirect(url_for('main'))  #redirects to viewing lsitings
+    
+    conn= dbi.connect()
+    curs = dbi.dict_cursor(conn)
+
+    #Check if the listing is already bookmarked by the user
+    curs.execute(''' SELECT * FROM bookmarks WHERE uid=%s AND lis_id=%s''', (uid, lis_id))
+    existing_bookmark = curs.fetchone()
+
+    if existing_bookmark:
+        flash("This is listing is already bookmarked")
+    else:
+        #Bookmarks the listing by inserting into bookmarks table
+        curs.execute(''' INSERT INTO bookmarks (uid, lis_id) VALUES(%s, %s);''', (uid, lis_id))
+        conn.commit()
+        flash('Listing bookmarked successfully')
+
+    return redirect(url_for('main'))
+
+@app.route('/bookmarks/')
+def view_bookmarks():
+    if "username" not in session:
+        flash("You need to be logged in to view your bookmarks")
+        return redirect(url_for('main'))
+
+    uid = session.get('uid')
+
+    conn= dbi.connect()
+    curs = dbi.dict_cursor(conn)
+
+    #Gets all bookmarked listings for the current user
+    curs.execute('''select lis_id, item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
+                from listing JOIN bookmarks ON bookmark.lis_id = listing.lis_id WHERE bookmarks.uid = %s;''', (uid,))
+    bookmarks = curs.fetchall()
+
+    return render_template('bookmarks.html', bookmarks=bookmarks)
+
+
+@app.route('/mark_as_sold/<int:lis_id>/', methods=['POST'])
+def mark_as_sold(lis_id):
+    if "username" not in session:
+        flash("You need to be logged in to view your bookmarks")
+        return redirect(url_for('main'))
+
+    uid = session.get('uid')
+
+    conn= dbi.connect()
+    curs = dbi.dict_cursor(conn)
+
+    #Check if the listing exists and if the current user is the owner
+    curs.execute('''SELECT * FROM listing WHERE lis_id = %s AND uid = %s''', (lis_id, uid))
+    listing = curs.fetchone()
+    
+    #Check if the listing is already marked as sold(item_status= true)
+    if listing:
+        if listing['item_status'] == 1:
+            flash("This listing is already marked as old.")
+            return redirect(url_for('main'))
+    else:
+        curs.execute('''UPDATE listing SET item_status= 1 WHERE lis_id = %s''', (lis_id))
+        conn.commit()
+        flash("Listing marked as sold successfully")
+    
+    return redirect(url_for('main'))
+
 
 if __name__ == '__main__':
     """
