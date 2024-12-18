@@ -196,13 +196,12 @@ def bio():
 
     return render_template('bio_page.html', listings = listings, person = person, user = user, list_num = list_num)
 
-@app.route('/edit-bio/', methods=['GET','POST'])
+@app.route('/edit-bio/', methods=['GET', 'POST'])
 def edit_bio():
     """
     Collects user information from uid in session.
     Edit form for user to edit their info. 
     """
-
     if "username" not in session:
         flash("You do not have access, please log in or sign up")
         return redirect(url_for("index"))
@@ -214,27 +213,30 @@ def edit_bio():
 
     if request.method == "POST":
         form_data = request.form
+        username = form_data.get('username')
+        display_name = form_data.get('display_name')  
+        email = form_data.get('email')
 
-        username = form_data['username']
-        display_name = form_data['display']
-        email = form_data['email']
- 
+        if not username or not display_name or not email:
+            flash("All fields are required")
+            return redirect(url_for('edit_bio'))
+
         try:
-            curs.execute('''update user set username = %s, display_name = %s, email = %s where uid = %s;''', [username, display_name, email, uid])
+            curs.execute('''update user set username = %s, display_name = %s, email = %s where uid = %s;''', 
+                         [username, display_name, email, uid])
             conn.commit()
-            flash("updated your info!")
+            flash("Updated your info!")
             return redirect(url_for("bio"))
         except pymysql.err.IntegrityError as err:
             details = err.args
             if details[0] == pymysql.constants.ER.DUP_ENTRY:
-                flash("that username is taken, try anotherone!")
+                flash("That username is taken, try another one!")
                 return redirect(url_for('edit_bio'))
-
 
     curs.execute('''select username, display_name, email from user where uid = %s;''', [uid])
     person = curs.fetchone()
 
-    return render_template("edit_bio.html", user = user, person = person)
+    return render_template("edit_bio.html", person=person)
 
 
 @app.route('/search/', methods=['GET'])

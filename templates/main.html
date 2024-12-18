@@ -22,7 +22,7 @@
 
             <!-- Conditionally Display SOLD Label -->
             {% if listing['item_status'] == 0 %}
-                <span class="sold-label">SOLD</span>  <!-- Add SOLD label when item is sold -->
+                <span class="sold-la`bel">SOLD</span>  <!-- Add SOLD label when item is sold -->
             {% endif %}
 
             <a href="{{ url_for('view_comments', lis_id=listing['lis_id']) }}">View Comments</a>
