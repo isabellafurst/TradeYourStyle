@@ -66,13 +66,15 @@ def join():
     Doesn't allow for duplicates of usernames.
     """
     username = request.form.get('username')
+    display_name = request.form.get('name')
+    email = request.form.get('email')
     passwd1 = request.form.get('password1')
     passwd2 = request.form.get('password2')
     if passwd1 != passwd2:
         flash('passwords do not match')
         return redirect( url_for('index'))
     conn = dbi.connect()
-    (uid, is_dup, other_err) = auth.insert_user(conn, username, passwd1)
+    (uid, is_dup, other_err) = auth.insert_user(conn, username, passwd1, display_name, email)
     if other_err:
         raise other_err
     if is_dup:
@@ -494,7 +496,8 @@ def view_bookmarks():
     curs = dbi.dict_cursor(conn)
 
     #Gets all bookmarked listings for the current user
-    curs.execute('''select lis_id, item_image, item_desc, item_type, item_color, item_usage, item_price, item_size, item_type, item_status, post_date
+    curs.execute('''select listing.lis_id, listing.item_image, listing.item_desc, listing.item_type, listing.item_color, listing.item_usage, 
+                    listing.item_price, listing.item_size, listing.item_type, listing.item_status, listing.post_date
                 from listing JOIN bookmarks ON bookmark.lis_id = listing.lis_id WHERE bookmarks.uid = %s;''', (uid,))
     bookmarks = curs.fetchall()
 
