@@ -377,6 +377,59 @@ def add_listing():
 
     return render_template('add_listing.html', user = user)
 
+@app.route('/edit-listing/<int:lis_id>', methods=['GET', 'POST'])
+def edit_listing(lis_id):
+    if "username" not in session:
+        flash("You need to log in to edit listings.")
+        return redirect(url_for('index'))
+
+    uid = session['uid']
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+
+    curs.execute('select * from listing where lis_id = %s and uid = %s', (lis_id, uid))
+    listing = curs.fetchone()
+
+    if not listing:
+        flash("You cannot edit this listing.")
+        return redirect(url_for('bio')) 
+
+    if request.method == 'POST':
+        item_desc = request.form.get('description')
+        item_type = request.form.get('type')
+        item_color = request.form.get('color')
+        item_usage = request.form.get('usage')
+        item_price = request.form.get('price')
+        item_size = request.form.get('size')
+
+        if not item_desc or not item_type or not item_price:
+            flash("Fill out all required fields.")
+            return redirect(url_for('edit_listing', lis_id=lis_id))
+
+        curs.execute('''
+            update listing 
+            set item_desc = %s, item_type = %s, item_color = %s, item_usage = %s, item_price = %s, item_size = %s
+            where lis_id = %s AND uid = %s
+        ''', (item_desc, item_type, item_color, item_usage, item_price, item_size, lis_id, uid))
+        file = request.files.get('image')
+        if file and file.filename:
+            user_filename = file.filename
+            if allowed_file(user_filename):
+                ext = user_filename.split('.')[-1]
+                filename = secure_filename(f'{uid}_{lis_id}.{ext}')
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                curs.execute('''
+                    update listing set item_image = %s where lis_id = %s
+                ''', (filename, lis_id))
+            else:
+                flash("Invalid file format. Please try another image file.")
+                return redirect(url_for('edit_listing', lis_id=lis_id))
+        conn.commit()
+        flash("Listing updated successfully!")
+        return redirect(url_for('bio'))  
+
+    return render_template('edit_listing.html', listing=listing)
+
 def allowed_file(filename):
     """
     Helper Function: checks if the user uploaded file has an allowed extension (png, jpg, jpeg)

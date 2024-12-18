@@ -75,12 +75,12 @@ div.listing-details2 p{
     margin-right: 10px;
 }
 
-div.image > img {
+div.listing-card-0 img,
+div.listing-card-1 img {
     max-width: 100%; 
-    max-height: auto; 
-    object-fit: contain; 
-    display: block; 
-    margin: auto; 
+    max-height: 200px; 
+    object-fit: cover; 
+    margin-bottom: 5%; 
 }
 
 /* for a simple navbar. Talk to Scott if you want drop-downs. */

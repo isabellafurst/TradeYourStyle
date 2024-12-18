@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+
+<h2>Edit Listing: </h2>
+
+<form action="{{ url_for('edit_listing', lis_id=listing.lis_id) }}" method="POST" enctype="multipart/form-data">
+    <p><label>Current Image:</label><br>
+        <img src="{{ url_for('image', id=listing.lis_id) }}" alt="Listing Image" width="150">
+    </p>
+
+    <p><label>Upload New Image (optional):</label>
+        <input type="file" name="image">
+    </p>
+
+    <p><label>Item Description: <br>
+        <textarea name="description" rows="4" cols="40">{{ listing.item_desc }}</textarea>
+    </label></p>
+
+    <p><label>Type: 
+        <select name="type">
+            <option value="shirt" {% if listing.item_type == "shirt" %}selected{% endif %}>Shirt</option>
+            <option value="pants" {% if listing.item_type == "pants" %}selected{% endif %}>Pants</option>
+            <option value="shorts" {% if listing.item_type == "shorts" %}selected{% endif %}>Shorts</option>
+            <option value="skirt" {% if listing.item_type == "skirt" %}selected{% endif %}>Skirt</option>
+            <option value="outerwear" {% if listing.item_type == "outerwear" %}selected{% endif %}>Outerwear</option>
+            <option value="shoes" {% if listing.item_type == "shoes" %}selected{% endif %}>Shoes</option>
+            <option value="accessories" {% if listing.item_type == "accessories" %}selected{% endif %}>Accessories</option>
+            <option value="dress" {% if listing.item_type == "dress" %}selected{% endif %}>Dress</option>
+            <option value="other" {% if listing.item_type == "other" %}selected{% endif %}>Other</option>
+        </select>
+    </label></p>
+
+    <p><label>Color: 
+        <select name="color">
+            <option value="multicolor" {% if listing.item_color == "multicolor" %}selected{% endif %}>Multicolor</option>
+            <option value="black" {% if listing.item_color == "black" %}selected{% endif %}>Black</option>
+            <option value="white" {% if listing.item_color == "white" %}selected{% endif %}>White</option>
+            <option value="brown" {% if listing.item_color == "brown" %}selected{% endif %}>Brown</option>
+            <option value="gray" {% if listing.item_color == "gray" %}selected{% endif %}>Gray</option>
+            <option value="red" {% if listing.item_color == "red" %}selected{% endif %}>Red</option>
+            <option value="orange" {% if listing.item_color == "orange" %}selected{% endif %}>Orange</option>
+            <option value="yellow" {% if listing.item_color == "yellow" %}selected{% endif %}>Yellow</option>
+            <option value="green" {% if listing.item_color == "green" %}selected{% endif %}>Green</option>
+            <option value="blue" {% if listing.item_color == "blue" %}selected{% endif %}>Blue</option>
+            <option value="purple" {% if listing.item_color == "purple" %}selected{% endif %}>Purple</option>
+            <option value="pink" {% if listing.item_color == "pink" %}selected{% endif %}>Pink</option>
+            <option value="gold" {% if listing.item_color == "gold" %}selected{% endif %}>Gold</option>
+            <option value="silver" {% if listing.item_color == "silver" %}selected{% endif %}>Silver</option>
+        </select>
+    </label></p>
+
+    <p><label>Usage: 
+        <select name="usage">
+            <option value="new" {% if listing.item_usage == "new" %}selected{% endif %}>New</option>
+            <option value="like-new" {% if listing.item_usage == "like-new" %}selected{% endif %}>Like New</option>
+            <option value="well-loved" {% if listing.item_usage == "well-loved" %}selected{% endif %}>Well Loved</option>
+            <option value="needs work" {% if listing.item_usage == "needs work" %}selected{% endif %}>Needs Work</option>
+            <option value="trash it" {% if listing.item_usage == "trash it" %}selected{% endif %}>Trash It</option>
+        </select>
+    </label></p>
+
+    <p><label>Price: 
+        <select name="price">
+            <option value="$" {% if listing.item_price == "$" %}selected{% endif %}>$</option>
+            <option value="$$" {% if listing.item_price == "$$" %}selected{% endif %}>$$</option>
+            <option value="$$$" {% if listing.item_price == "$$$" %}selected{% endif %}>$$$</option>
+        </select>
+    </label></p>
+
+    <p><label>Size: 
+        <select name="size">
+            <option value="XS" {% if listing.item_size == "XS" %}selected{% endif %}>Extra Small</option>
+            <option value="S" {% if listing.item_size == "S" %}selected{% endif %}>Small</option>
+            <option value="M" {% if listing.item_size == "M" %}selected{% endif %}>Medium</option>
+            <option value="L" {% if listing.item_size == "L" %}selected{% endif %}>Large</option>
+            <option value="XL" {% if listing.item_size == "XL" %}selected{% endif %}>Extra Large</option>
+            <option value="XXL" {% if listing.item_size == "XXL" %}selected{% endif %}>Extra Extra Large</option>
+        </select>
+    </label></p>
+
+    <button type="submit">Save Changes</button>
+</form>
+
+{% endblock %}

@@ -11,7 +11,7 @@
 <p>Number of Listings: {{list_num}}</p>
 
 <form id="editform" method="POST" action="{{url_for('edit_bio')}}">
-    <button type="submit">Edit</button>
+    <button type="submit">Edit Profile</button>
   </form>
 
 <h3>Your Listings:</h3>
@@ -42,7 +42,10 @@
         <button type="submit" name="submit" value="available">Mark as Available</button>
     </form>
     {% endif %}
-
+    
+    <form action="{{ url_for('edit_listing', lis_id=listing['lis_id']) }}" method="GET">
+        <button type="submit" class="btn btn-primary">Edit</button>
+    </form>
     </div>
 </div>
 
