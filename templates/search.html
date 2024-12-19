@@ -102,6 +102,12 @@
         <p class="list-attr">Price: {{ listing['item_price'] }}</p>
         <p class="list-attr">Size: {{ listing['item_size'] }}</p>
     </div>
+
+    <!-- Conditionally Display TRADED Label -->
+    {% if listing['item_status'] == 0 %}
+    <span class="sold-label">TRADED</span>  <!-- Add TRADED label when item is sold -->
+    {% endif %}
+
     </div>
         <!-- Comments Section -->
         <div class="comments-section">

@@ -20,18 +20,13 @@
                 <p class="list-attr">Size: {{ listing['item_size'] }}</p>
             </div>
 
-            <!-- Conditionally Display SOLD Label -->
+            <!-- Conditionally Display TRADED Label -->
             {% if listing['item_status'] == 0 %}
-                <span class="sold-label">SOLD</span>  <!-- Add SOLD label when item is sold -->
+                <span class="sold-label">TRADED</span>  <!-- Add TRADED label when item is sold -->
             {% endif %}
 
             <a href="{{ url_for('view_comments', lis_id=listing['lis_id']) }}">View Comments</a>
-        
-            {% if listing['item_status'] == 1 and listing['uid'] == session['uid'] %}
-            <form method="POST" action="{{ url_for('mark_as_sold', lis_id=listing['lis_id']) }}">
-                <button type="submit">Mark as Sold</button>
-            </form>
-            {% endif %}
+    
 
             {% if 'username' in session %}
             <form method="POST" action="{{ url_for('bookmark_listing', lis_id=listing['lis_id']) }}">

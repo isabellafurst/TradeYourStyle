@@ -562,35 +562,8 @@ def view_bookmarks():
     bookmarks = curs.fetchall()
     print(f"Bookmarked Listings: {bookmarks}")
 
-    return render_template('bookmarks.html', bookmarks=bookmarks)
+    return render_template('bookmarks.html', bookmarks=bookmarks, user = user)
 
-
-@app.route('/mark_as_sold/<int:lis_id>/', methods=['POST'])
-def mark_as_sold(lis_id):
-    if "username" not in session:
-        flash("You need to be logged in to view your bookmarks")
-        return redirect(url_for('main'))
-
-    uid = session.get('uid')
-
-    conn= dbi.connect()
-    curs = dbi.dict_cursor(conn)
-
-    #Check if the listing exists and if the current user is the owner
-    curs.execute('''SELECT * FROM listing WHERE lis_id = %s AND uid = %s''', (lis_id, uid))
-    listing = curs.fetchone()
-    
-    #Check if the listing is already marked as sold(item_status= true)
-    if listing:
-        if listing['item_status'] == 1:
-            flash("This listing is already marked as old.")
-            return redirect(url_for('main'))
-    else:
-        curs.execute('''UPDATE listing SET item_status= 1 WHERE lis_id = %s''', (lis_id))
-        conn.commit()
-        flash("Listing marked as sold successfully")
-    
-    return redirect(url_for('main'))
 
 
 if __name__ == '__main__':

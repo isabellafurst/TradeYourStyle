@@ -31,6 +31,11 @@
         <p class="list-attr">Size: {{ listing['item_size'] }}</p>
     </div>
 
+    <!-- Conditionally Display TRADED Label -->
+    {% if listing['item_status'] == 0 %}
+    <span class="sold-label">TRADED</span>  <!-- Add TRADED label when item is sold -->
+    {% endif %}
+
     {% if listing['item_status'] == 1 %}
         <form id="tradedform" action="{{url_for('bio')}}" method="POST">
             <input type="hidden" name="id" value="{{ listing['lis_id'] }}">
