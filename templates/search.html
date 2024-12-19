@@ -91,7 +91,7 @@
 {% for listing in listings %}
 
 <div class = "listing-card-{{listing['item_status']}}">
-    <img src="{{listing['item_image']}}" alt = "Image">
+    <img src="{{url_for('image', id=listing['lis_id'])}}" alt ="{{listing['item_image']}}">
     <div class = "listing-details">
         <h3>{{listing['display_name']}}</h3>
         <p class="list-attr">{{listing['item_desc']}}</p>
