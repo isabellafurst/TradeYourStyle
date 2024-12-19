@@ -148,6 +148,7 @@ nav button:hover, button:focus, nav a:hover, nav a:focus {
     padding: 10px;
     margin-bottom: 15px;
     background-color: #ffffff; 
+}
 
 .sold-label {
     background-color: red;
