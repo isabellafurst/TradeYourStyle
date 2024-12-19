@@ -539,7 +539,7 @@ def bookmark_listing(lis_id):
 
     return redirect(url_for('main'))
 
-@app.route('/bookmarks/')
+@app.route('/bookmarks/', methods=['GET'])
 def view_bookmarks():
     if "username" not in session:
         flash("You need to be logged in to view your bookmarks")
@@ -551,10 +551,16 @@ def view_bookmarks():
     curs = dbi.dict_cursor(conn)
 
     #Gets all bookmarked listings for the current user
+    print(f"Executing SQL for user {uid}:")
+    print('''select listing.lis_id, listing.item_image, listing.item_desc, listing.item_type, listing.item_color, listing.item_usage,
+         listing.item_price, listing.item_size, listing.item_type, listing.item_status, listing.post_date
+         from listing JOIN bookmarks ON bookmarks.lis_id = listing.lis_id WHERE bookmarks.uid = %s;''', (uid,))
+
     curs.execute('''select listing.lis_id, listing.item_image, listing.item_desc, listing.item_type, listing.item_color, listing.item_usage, 
                     listing.item_price, listing.item_size, listing.item_type, listing.item_status, listing.post_date
-                from listing JOIN bookmarks ON bookmark.lis_id = listing.lis_id WHERE bookmarks.uid = %s;''', (uid,))
+                from listing JOIN bookmarks ON bookmarks.lis_id = listing.lis_id WHERE bookmarks.uid = %s;''', (uid,))
     bookmarks = curs.fetchall()
+    print(f"Bookmarked Listings: {bookmarks}")
 
     return render_template('bookmarks.html', bookmarks=bookmarks)
 
